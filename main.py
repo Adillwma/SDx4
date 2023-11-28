@@ -1,42 +1,34 @@
+from upscalar_class import upscaler
 from PIL import Image
-from diffusers import StableDiffusionUpscalePipeline
-import torch
-from torch.utils.tensorboard import SummaryWriter
 import os
 
-# Create a directory to store TensorBoard logs and saved images
-log_dir = "tensorboard_logs"
-os.makedirs(log_dir, exist_ok=True)
 
-# Create a TensorBoard writer
-writer = SummaryWriter(log_dir=log_dir)
+if __name__ == "__main__":
+    # specify local image path
+    local_image_paths = [r"A:\Users\Ada\Pictures\EN2wgxqW4AAtwLc.jpg"]  # replace with your actual image path
+    output_dir = r"output_data/"
+    prompt = ""
+    negative_prompt = ""
+    num_inference_steps = 10   # Must be > 3 for any usable output, > 5 for okay output, > 10 for good output, 50+ for great output
+    guidance_scale = 0.5
+    patch_size = 120
+    padding_size = 8
+    use_tensorboard = False
+    show_patches = False
+    dummy_upscale = False              # For debugging. If True, will not use the neural net to upscale image, instead a very very fast bicubic upscale is used, to speed up testing the rest of the code. Always set to False for actual usage.
 
-# load model and scheduler
-model_id = "stabilityai/stable-diffusion-x4-upscaler"
-pipeline = StableDiffusionUpscalePipeline.from_pretrained(model_id, torch_dtype=torch.float32)
-pipeline = pipeline.to("cpu")   # use CPU for inference
+    upscale = upscaler(use_tensorboard=use_tensorboard)
+    os.makedirs(output_dir, exist_ok=True)
 
-# specify local image path
-local_image_path = r"A:\Users\Ada\Pictures\rd.png"  # replace with your actual image path
-low_res_img = Image.open(local_image_path).convert("RGB")
-#low_res_img = low_res_img.resize((128, 128))
-# save image
-low_res_img.save(os.path.join(log_dir, "low_res_cat_camelprompt.png"))
+    for local_image_path in local_image_paths:
+            
+        upscaled_image = upscale.upscale(local_image_path, patch_size, padding_size, num_inference_steps, guidance_scale, prompt, negative_prompt, show_patches, dummy_upscale)
+        
+        # get input image name
+        image_name = os.path.basename(local_image_path)
+        image_name = os.path.splitext(image_name)[0]    # remove file extension
 
-# Log the low-resolution image to TensorBoard
-writer.add_image("Low Resolution Image", torch.tensor(low_res_img).permute(2, 0, 1).unsqueeze(0))
-
-prompt = "a lady"
-
-# Perform inference
-upscaled_image = pipeline(prompt=prompt, image=low_res_img).images[0]
-
-# Save the upscaled image
-upscaled_image_path = os.path.join(log_dir, "upsampled_cat_camelprompt.png")
-upscaled_image.save(upscaled_image_path)
-
-# Log the upscaled image to TensorBoard
-writer.add_image("Upscaled Image", torch.tensor(upscaled_image).permute(2, 0, 1).unsqueeze(0))
-
-# Close the TensorBoard writer
-writer.close()
+        # copy input image to output location 
+        low_res_img = Image.open(local_image_path).convert("RGB")
+        low_res_img.save(output_dir + image_name + "_Original.png")
+        upscaled_image.save(output_dir + image_name + "_Upscaled.png")
