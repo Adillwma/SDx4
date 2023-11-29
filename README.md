@@ -36,9 +36,9 @@ SDx4 Image Upscaler is a user-friendly Windows GUI application that leverages th
 - Packaged as a windows installer with no python or code dependencies.
 - Lightweight modern windows GUI to simplify usage. 
 - Batch processing upscaling ability
-- Incorperates tiled processing to allow for large images to be upscaled with low ram usage and direct cpu processig for users without cuda gpu's.
-- Dynamic tileshifting to reduce edge artifacts, and allow for a more accurate upscale whilst avoiding dark pixel padding or processing non image data.
-- Soft and hard edge blending selectable by user.
+- Incorperates fixed tile processing to allow for large images to be upscaled with low ram usage and direct cpu processig for users without cuda gpu's whilst opperating the upscale model at its optimum resoloution.
+- Dynamic tileshifting to reduce image edge artifacts, and allow for a more accurate upscale whilst avoiding dark pixel padding or processing non image data.
+- Soft and hard edge blending selectable by user to reduce tile edge seams.
 - Ability to use the xFormers library to greatly speed up processing given a cuda gpu.            
 - Ability to use cpu offloading to allow for boosted cpu processing whilst using a cuda gpu.   
 - Ability to introduce attention slicing to reduce memory usage (not recomended, inferior to xFormers and covered by tiled processing) 
@@ -79,18 +79,16 @@ python SDx4_Image_Upscaler.py
 ```
 
 ## Usage
-To run SDx4 Image Upscaler on Windows, follow these steps:
+To run SDx4 Image Upscaler, follow these steps:
 
-1. Run 'SDx4 Image Upscaler'.
+      1. Add the image(s) you wish to upscale by clicking the 'Add Images' button or add all the images in a folder at once by clicking the 'Add folder' button.
+         You can remove items added to the list by accident by selecting them on the list and clicking the 'Remove Selected' button
 
-2. Add the image(s) you wish to upscale by clicking the 'Add Images' button or add all the images in a folder at once by clicking the 'Add folder' button.
-   You can remove items added to the list by accident by selecting them on the list and clicking the 'Remove Selected' button
+      2. Select the output directory you wish to save the upscaled image to on the right hand settings pane.
 
-3. Select the output directory you wish to save the upscaled image to on the right hand settings pane.
+      3. Click the 'Upscale' button to begin upscaling...
 
-4. Click the 'Upscale' button to begin upscaling.
-
-   Congratulations your image is now 4x the resoloution!
+      ... Congratulations your image is now 4x the resoloution!
 
 Advanced Settings:
 

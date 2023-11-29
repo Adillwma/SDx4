@@ -4,7 +4,7 @@ import os
 
 
 if __name__ == "__main__":
-    local_image_paths = [r"A:\Users\Ada\Desktop\t3.jpg", r"A:\Users\Ada\Desktop\t4.jpg", r"A:\Users\Ada\Desktop\t5.jpg", r"A:\Users\Ada\Desktop\t6.jpg"]      # specify local image paths
+    local_image_paths = [ r"A:\Users\Ada\Desktop\t5.jpg", r"A:\Users\Ada\Desktop\t6.jpg"]      # specify local image paths            # ERROR ON THIS IMAGE!!!!!!!!!!!!!   r"A:\Users\Ada\Desktop\t4.jpg",
     output_dir = r"output_data/"           # specify output directory
     prompt = ""                            # specify prompt for image upscaling
     negative_prompt = ""                   # specify negative prompt for image upscaling
