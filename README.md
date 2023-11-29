@@ -1,4 +1,3 @@
-
 <div align="center">
 
 # Windows SDx4 Image Upscaler
@@ -17,25 +16,31 @@
 </div>
 
 ## Introduction
-SDx4 Image Upscaler is a windows GUI package for the [Stability AI Stable Diffusion x4 Upscaler](https://huggingface.co/stabilityai/stable-diffusion-x4-upscaler) model. It is designed to be a simple to use, lightweight, and secure way to upscale images using the power of AI. It is packaged as a windows installer with no python or code dependencies. It is designed to be a simple to use, lightweight, and secure way to upscale images using the power of AI. It is packaged as a windows installer with no python or code dependencies. It is designed to be a simple to use, lightweight, and secure way to upscale images using the power of AI. It is packaged as a windows installer with no python or code dependencies. It is designed to be a simple to use, lightweight, and secure way to upscale images using the power of AI. It is packaged as a windows installer with no python or code dependencies. It is designed to be a simple to use, lightweight, and secure way to upscale images using the power of AI. It is packaged as a windows installer with no python or code dependencies. It is designed to be a simple to use, lightweight, and secure way to upscale images using the power of AI. It is packaged as a windows installer with no python or code dependencies. It is designed to be a simple to use, lightweight, and secure way to upscale images using the power of AI. It is packaged as a windows installer with no python or code dependencies.
+SDx4 Image Upscaler is a user-friendly Windows GUI application that leverages the power of the  [Stability AI Stable Diffusion x4 Upscaler](https://huggingface.co/stabilityai/stable-diffusion-x4-upscaler) model. This package is designed to provide a seamless, lightweight, and secure way to upscale your images with cutting edge neural upscaling. The package is bundled as a Windows installer, eliminating the need for Python or any additional code dependencies. Happy enhancing!
 
 ## Table of Contents
 - [Features](#features)
 - [Installation](#installation)
+   - [Windows](#windows)
+   - [Other Operating Systems](#other-operating-systems)
 - [Usage](#usage)
-- [License](#license)
+- [Methods](#methods)
+   - [Tiled Processing](#tiled-processing)
+   - [Dynamic Tileshifting](#dynamic-tileshifting)
+   - [Feathered Patching](#feathered-patching)
 - [Contributions](#contributions)
+- [License](#license)
 - [Contact](#contact)
 
 # Features
 - Packaged as a windows installer with no python or code dependencies.
 - Lightweight modern windows GUI to simplify usage. 
 - Batch processing upscaling ability
-- Icorperates tiled processing to allow for large images to be upscaled with low ram usage and direct cpu processig for users without cuda gpu's.
+- Incorperates tiled processing to allow for large images to be upscaled with low ram usage and direct cpu processig for users without cuda gpu's.
 - Dynamic tileshifting to reduce edge artifacts, and allow for a more accurate upscale whilst avoiding dark pixel padding or processing non image data.
 - Soft and hard edge blending selectable by user.
-- Ability to use the xFormers library to greatly speed up processing given a cuda gpu.
-- Ability to use cpu offloading to allow for boosted cpu processing whilst using a cuda gpu.
+- Ability to use the xFormers library to greatly speed up processing given a cuda gpu.            
+- Ability to use cpu offloading to allow for boosted cpu processing whilst using a cuda gpu.   
 - Ability to introduce attention slicing to reduce memory usage (not recomended, inferior to xFormers and covered by tiled processing) 
 - Local processing, no internet connection required.
 - Data security, none of your data is sent to any third party.
@@ -48,9 +53,63 @@ To install Windows_SDx4, follow these steps:
 
 1. Download the latest release of Windows_SDx4.exe from this repo using the following link: [BackupInspector Download](https://github.com/Adillwma/Windows_SDx4/raw/main/Windows_SDx4.exe)
 
-2. Run the downloaded BackupInspector.exe file.
+2. Run the downloaded 'SDx4 Image Upscaler.exe' file.
 
 ### Other Operating Systems
+To run SDx4 Image Upscaler on other operating systems, follow these steps:
+
+1. Clone this repo to your local machine using `
+git clone
+`:
+
+```shell
+git clone
+```
+
+2. Install the required dependencies using `pip`:
+
+```shell
+pip install -r requirements.txt
+```
+
+3. Run the application using `python`:
+
+```shell
+python SDx4_Image_Upscaler.py
+```
+
+## Usage
+To run SDx4 Image Upscaler on Windows, follow these steps:
+
+1. Run 'SDx4 Image Upscaler'.
+
+2. Add the image(s) you wish to upscale by clicking the 'Add Images' button or add all the images in a folder at once by clicking the 'Add folder' button.
+   You can remove items added to the list by accident by selecting them on the list and clicking the 'Remove Selected' button
+
+3. Select the output directory you wish to save the upscaled image to on the right hand settings pane.
+
+4. Click the 'Upscale' button to begin upscaling.
+
+   Congratulations your image is now 4x the resoloution!
+
+Advanced Settings:
+
+- Select the desired number of iterations using the slider. The higher the number of iterations the longer it will take to process each image, usually the more iterations used the better the upscale will be.
+
+- Set the Guidance Scale value. This controll how much the upscale is affected by the text prompt and negative prompt. Setting to 0 gives no effect from the prompts and the cleanest upscale in our opinion! Although your own results may vary. 
+
+- If you set the guidance scale > 0 you can enter a text prompt to guide the upscale. This can be anything you like, but we recomend a short description of the image. For example if you are upscaling a picture of a cat you could enter 'A picture of a cat'. This will help the upscale to focus on the cat and not the background.
+
+- Similarly you can enter a negative prompt to guide the upscale away from certain things. For example you can enter tems like 'text' or 'noise' to gently guide the upscale away from certain things, with varyiing degrees of succcess. 
+
+- Enable or disable tile edge blanding by clicking the 'Enable Tile Edge Blending' button. (Can be changed after upscale???)
+
+- If tile edge balnding is enabled, select the desired blend mode from the drop down menu.
+
+- Configure the pipeline settings
+Select the desired attention slicing from the drop down menu.
+Select the desired cpu offloading from the drop down menu.
+Select the desired xFormers from the drop down menu.
 
 
 
@@ -60,84 +119,85 @@ To install Windows_SDx4, follow these steps:
 
 
 
+## Methods
+
+### Tiled Processing
+To upscale very large images the memory usage can become extreamaly high, and in some cases exceed the available memory on the system, particuallrly when run on a consumer cpu with low system memory. To overcome this tiled processing is used. Tiled processing involves splitting the image into tiles of a smaller size, upscaling each tile individually and then recombining them for the final output. This allows for the upscaling of very large images with low memory usage and on bare CPU metal with no CUDA.
+
+To get ideal image upscale it is best to stick to the input image size the model was trained on. To this end using a fixed tile size reagrless of the image is the way to ensure each upscale is as accurate as possible. 
+
+to utilise the fixed size tiled processing will require padding edges of images which are not divisible by the tile size. This adds additional processing time as we are essentilly adding a buncvh of new pixels that need to be processed and have no image data in them so we know they are worthless already. Additonally this imethod itroduces image artifacts in those tiles that have a large proportion of padding in them vs image content as can be seen in the following example:
+
+
+<div align="center">
+</div>
+
+
+
+Additionally introdcuing tiling creates a new problem of edge artifacts. This is due to the fact that the model is trained on images that are not tiled, and thus the model has no knowledge of the edges of the tiles. This can be seen in the following example:
+
+
+<div align="center">
+</div>
+
+
+To overcome this problem we developed a method of dynamic tileshifting. 
+
+
+
+### Dynamic Tileshifting
+To overcome the issues descrived with a simple tiling strategy we developed a method of dynamic tileshifting.
+
+where a number of tiles are selected to cover the image as before, taking into account the padding size, however with the tiles bounded to the image, and the padding dynamically calulated with a minimum set by user.
+
+Every tile therfore is filled with image data, solving the distortion due to tiles full of padding on the right and bottom edge of the image.
+
+This does mean we are processing pixels of the image multiple times for no reason but it is favorable to it being padding which distorts the output and there si no way to scape it and retain the fixed window size for the model.
+
+### Feathered Patching
+In addition to the standard hard edge blanding various soft edge feathering blend modes for recombining the tiles are available to the user. These are:
+-Additive
+-Subtractive
+-Multiply
+-Divide
+-Overlay
+-Soft Light
+-Hard Light
+-Vivid Light
+-Linear Light
+-Pin Light
+
+These allow the tiles to be blended together in a more natural way, and can be used to reduce the edge artifacts that can be seen in the standard hard edge blending method.
+You can preview and adjust the blending live once upscaling has finished to perfect your image.
+
+<div align="center">
+</div>
+
+
+
+<div align="center">
+</div>
 
 
 
 
-Built on top of the [Stability AI Stable Diffusion x4 Upscaler](https://huggingface.co/stabilityai/stable-diffusion-x4-upscaler) model:
 
-Developed by: Robin Rombach, Patrick Esser 
-https://huggingface.co/stabilityai/stable-diffusion-x4-upscaler
-License: CreativeML Open RAIL++-M License
-Resources for more information: GitHub Repository.
+## Contributions
+Contributions to this codebase are welcome! If you encounter any issues, bugs or have suggestions for improvements please open an issue or a pull request on the [GitHub repository](https://github.com/Adillwma/BackupInspector).
 
-@InProceedings{Rombach_2022_CVPR,
-    author    = {Rombach, Robin and Blattmann, Andreas and Lorenz, Dominik and Esser, Patrick and Ommer, Bj\"orn},
-    title     = {High-Resolution Image Synthesis With Latent Diffusion Models},
-    booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
-    month     = {June},
-    year      = {2022},
-    pages     = {10684-10695}
-}
+## License
+This project is not currently licensed. Please contact for more information.
+
+SDx4 Image Upscaler is built on top of the [Stability AI Stable Diffusion x4 Upscaler](https://huggingface.co/stabilityai/stable-diffusion-x4-upscaler) model developed by Robin Rombach and Patrick Esser. The model is licensed under the CreativeML Open RAIL++-M License. For more information, refer to the LISCENCE file.
+
+PyQt6: This project uses the PyQt6 library, released under the GPL v3.
+
+# Contact
+For any further inquiries or for assistance in running the simulation, please feel free to reach out to me at adill@neuralworkx.com.
 
 
 
 
-
-PyQt6 is released under the GPL v3
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-my liscence
-[Your Software Name] License
-Version 1.0, [Date]
-
-Copyright (c) [Year], [Your Company/Organization Name]
-
-CreativeML Open RAIL++-M License
-dated November 24, 2022
-
-The [Your Software Name] software and its accompanying documentation are licensed under the terms and conditions of the CreativeML Open RAIL++-M License. By using, reproducing, or distributing the software, you agree to be bound by the terms of this license.
-
-1. Original License:
-   The [Your Software Name] software is based on the CreativeML Open RAIL++-M License dated November 24, 2022. The full text of the original license is available in the LICENSE file accompanying this software or can be found at [link to the original license].
-
-2. Modifications:
-   Any modifications or additions made to the original software, including the creation of a graphical user interface (GUI) bundled as an executable, are subject to the terms of the CreativeML Open RAIL++-M License.
-
-3. Use-Based Restrictions:
-   The software includes use-based restrictions as specified in Attachment A of the CreativeML Open RAIL++-M License. Users are prohibited from using the software in ways that violate applicable laws or the specified restrictions.
-
-4. Notices:
-   Users must be made aware that the software includes components covered by the CreativeML Open RAIL++-M License. Notices must be provided in the software interface or accompanying documentation.
-
-5. Disclaimer and Limitation of Liability:
-   The [Your Software Name] software is provided "AS IS" without any warranties or conditions. The distributor, [Your Company/Organization Name], is not liable for any damages arising from the use of the software.
-
-6. Compliance with Applicable Laws:
-   Users are required to comply with all applicable national, federal, state, local, or international laws and regulations when using the software.
-
-7. Distribution:
-   If you distribute the [Your Software Name] software, you must provide access to the full text of the CreativeML Open RAIL++-M License and any additional documentation.
-
-This [Your Software Name] License is in effect as of [Date]. For any questions regarding this license, please contact [Your Contact Information].
-
-END OF LICENSE
 
 
 
