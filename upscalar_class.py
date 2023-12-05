@@ -16,11 +16,11 @@ from tqdm import tqdm
 
 ### fix all blending modes. currently only normal works
 
-class upscaler():
-    def __init__(self, xformers=False, cpu_offload=False, attention_slicing=False, seed=None, use_tensorboard=False):
+class Upscaler():
+    def __init__(self, xformers=False, cpu_offload=False, attention_slicing=False, seed=None, use_tensorboard=False, safety_checker=None):
         self.generator = torch.manual_seed(seed) if seed else None
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.pipeline = StableDiffusionUpscalePipeline.from_pretrained("stabilityai/stable-diffusion-x4-upscaler", generator=self.generator, torch_dtype=torch.float32)   #, local_files_only=True
+        self.pipeline = StableDiffusionUpscalePipeline.from_pretrained("stabilityai/stable-diffusion-x4-upscaler", generator=self.generator, torch_dtype=torch.float32, safety_checker=safety_checker)   #, local_files_only=True
         self.pipeline = self.pipeline.to(self.device)   
 
         if xformers:
@@ -263,7 +263,7 @@ if __name__ == "__main__":
     show_patches = False
     dummy_upscale = False              # For debugging. If True, will not use the neural net to upscale image, instead a very very fast bicubic upscale is used, to speed up testing the rest of the code. Always set to False for actual usage.
 
-    upscale = upscaler(use_tensorboard=use_tensorboard)
+    upscale = Upscaler(use_tensorboard=use_tensorboard)
     upscaled_image = upscale.upscale(local_image_path, patch_size, padding_size, num_inference_steps, guidance_scale, prompt, negative_prompt, blending, callback_steps, show_patches, dummy_upscale)
     
     # copy input image to output location 

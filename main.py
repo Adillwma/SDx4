@@ -8,7 +8,7 @@ if __name__ == "__main__":
     output_dir = r"output_data/"           # specify output directory
     prompt = ""                            # specify prompt for image upscaling
     negative_prompt = ""                   # specify negative prompt for image upscaling
-    num_inference_steps = 25                # Must be > 3 for any usable output, > 5 for okay output, > 10 for good output, 50+ for great output
+    num_inference_steps = 5                # Must be > 3 for any usable output, > 5 for okay output, > 10 for good output, 50+ for great output
     guidance_scale = 0.5          
     patch_size = 120         
     padding_size = 8               
@@ -20,7 +20,8 @@ if __name__ == "__main__":
     xformers = False                       # If True, will use the xformers model. If False, will use the original model.
     cpu_offload = False                    # If True, will use the CPU for the first few inference steps, then switch to the GPU. If False, will use the GPU for all inference steps. If True, will be slower but will use less GPU memory.
     attention_slicing = False              # If True, will use attention slicing. If False, will not use attention slicing. If True, will be slower but will use less GPU memory.
-
+    safety_checker = None
+    
     # Debugging settings
     show_patches = False                   # If True, will show the patches that are being upscaled. If False, will not show the patches that are being upscaled.
     dummy_upscale = False                  # For debugging. If True, will not use the neural net to upscale image, instead a very very fast bicubic upscale is used, to speed up testing the rest of the code. Always set to False for actual usage.
@@ -28,7 +29,7 @@ if __name__ == "__main__":
     seed = None                            # If None, will use a random seed. If set to a numerical value, will use value as the generator seed.
 
 
-    upscale = upscaler(xformers, cpu_offload, attention_slicing, seed, use_tensorboard)
+    upscale = upscaler(xformers, cpu_offload, attention_slicing, seed, use_tensorboard, safety_checker)
     os.makedirs(output_dir, exist_ok=True)
 
     for local_image_path in local_image_paths:
