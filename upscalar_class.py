@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import math
 from PIL import Image, ImageChops, ImageEnhance
 from tqdm import tqdm
+from PyQt6.QtCore import pyqtSignal, QObject
 
 ### beacuse we are checking if file is greater than patch without padding when a file is exactly of windows size and there is only one pathc then we end up genrating four for no reason
 
@@ -16,8 +17,12 @@ from tqdm import tqdm
 
 ### fix all blending modes. currently only normal works
 
-class Upscaler():
+class Upscaler(QObject):
+    callback_signal = pyqtSignal(object, int, str)  # Signal that emits image data
+    tile_complete_signal = pyqtSignal(object, int, str)          # Signal that emits the number of the tile that has just been upscaled
+
     def __init__(self, xformers=False, cpu_offload=False, attention_slicing=False, seed=None, use_tensorboard=False, safety_checker=None):
+        super().__init__()  # Call the __init__ method of the parent class
         self.generator = torch.manual_seed(seed) if seed else None
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.pipeline = StableDiffusionUpscalePipeline.from_pretrained("stabilityai/stable-diffusion-x4-upscaler", generator=self.generator, torch_dtype=torch.float32, safety_checker=safety_checker)   #, local_files_only=True
@@ -59,6 +64,11 @@ class Upscaler():
             # do something with the Images
             for i, img in enumerate(image):
                 img.save(f"callbacks\patch_{self.patch_num}_iter_{iter}_img{i}.png")
+
+                # report that a new image is ready as a signal or something so an outside class can execute an event 
+                self.callback_signal.emit(img, self.patch_num, self.filepath)
+
+                
 
     def calculate_dynamic_overlap(self, x, window_size, patch_size):
         blocks = int(np.ceil(x / patch_size))
@@ -195,6 +205,7 @@ class Upscaler():
         pass
 
     def upscale(self, local_image_path, patch_size=120, padding_size=8, num_inference_steps=10, guidance_scale=0.5, prompt="", negative_prompt="", blending=True, callback_steps=1, show_patches=False, dummy_upscale=False):
+        self.filepath = local_image_path
         # specify local image path
         low_res_img = Image.open(local_image_path).convert("RGB")
 
@@ -221,6 +232,7 @@ class Upscaler():
                 
 
             upscaled_patches.append(upscaled_patch)
+            self.tile_complete_signal.emit(upscaled_patch, patch_num, local_image_path)
             #self.update_animation(upscaled_patches)
 
         if show_patches:

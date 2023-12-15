@@ -105,9 +105,9 @@ Advanced Settings:
 - If tile edge balnding is enabled, select the desired blend mode from the drop down menu.
 
 - Configure the pipeline settings, optional but can be used to speed up processing and reduce memory usage. These enhancements are exclusively available for NVIDIA CUDA 11.1+ enabled GPUs, if a supported GPU is not detected the settings will not be applied.
-  - Attention slicing: ⚠️ When memory efficient attention and sliced attention are both enabled, memory efficient attention takes precedent.
-  - CPU offloading:  This enhancement is exclusively available for NVIDIA CUDA 11.1+ enabled GPUs
-  - xFormers memeory efficent attentiton: This enhancement is exclusively available for NVIDIA CUDA 11.1+ enabled GPUs
+  - Attention slicing: ⚠️ When memory efficient attention and sliced attention are both enabled, memory efficient attention takes precedent. This enhancement is exclusively available for NVIDIA CUDA 11.1+ enabled GPUs
+  - CPU offloading:  ⚠️ This enhancement is exclusively available for NVIDIA CUDA 11.1+ enabled GPUs
+  - xFormers memeory efficent attentiton: ⚠️ This enhancement is exclusively available for NVIDIA CUDA 11.1+ enabled GPUs
 
 
 
