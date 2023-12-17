@@ -12,7 +12,6 @@
 
 [![Github Repo](https://img.shields.io/badge/GitHub_Repo-SDx4_ImageUpscaler-yellow.svg)](https://github.com/Adillwma/Windows_SDx4_ImageUpscaler)
 [![Language](https://img.shields.io/badge/language-Python-blue.svg)](https://www.python.org/)
-[![Published](https://img.shields.io/badge/Published-2023-purple.svg)]()
 </div>
 
 ## Introduction
@@ -94,6 +93,8 @@ Advanced Settings:
 
 - Select the desired number of iterations using the slider. The higher the number of iterations the longer it will take to process each image, usually the more iterations used the better the upscale will be.
 
+- Enabling the "Boost Face Quality" will attempt to automatically detect faces in the image and process tiles that contain faces with 2x the set number of iterations. The upscaling struggles the most with reproducing human faces, so this can be used to improve the quality of faces in the final image. This will increase the processing time of the image. This feature can either be used to provide increased face quality above the rest of the image, or to reduce processing time by reducing the number of iterations used for the rest of the image whilst retaining acceptable face reproduction, these have both been quantified later in the readme in the [Boosted Face Quality](#boosted-face-quality) section.
+
 - Set the Guidance Scale value. This controll how much the upscale is affected by the text prompt and negative prompt. Setting to 0 gives no effect from the prompts and the cleanest upscale in our opinion! Although your own results may vary. 
 
 - If you set the guidance scale > 0 you can enter a text prompt to guide the upscale. This can be anything you like, but we recomend a short description of the image. For example if you are upscaling a picture of a cat you could enter 'A picture of a cat'. This will help the upscale to focus on the cat and not the background.
@@ -102,12 +103,12 @@ Advanced Settings:
 
 - Enable or disable tile edge blanding by clicking the 'Enable Tile Edge Blending' button. (Can be changed after upscale???)
 
-- If tile edge balnding is enabled, select the desired blend mode from the drop down menu.
+- If tile edge blending is enabled, select the desired blend mode from the drop down menu.
 
 - Configure the pipeline settings, optional but can be used to speed up processing and reduce memory usage. These enhancements are exclusively available for NVIDIA CUDA 11.1+ enabled GPUs, if a supported GPU is not detected the settings will not be applied.
-  - Attention slicing: ⚠️ When memory efficient attention and sliced attention are both enabled, memory efficient attention takes precedent. This enhancement is exclusively available for NVIDIA CUDA 11.1+ enabled GPUs
-  - CPU offloading:  ⚠️ This enhancement is exclusively available for NVIDIA CUDA 11.1+ enabled GPUs
-  - xFormers memeory efficent attentiton: ⚠️ This enhancement is exclusively available for NVIDIA CUDA 11.1+ enabled GPUs
+  - ⚠️ Attention slicing: When memory efficient attention and sliced attention are both enabled, memory efficient attention takes precedent. This enhancement is exclusively available for NVIDIA CUDA 11.1+ enabled GPUs
+  - ⚠️ CPU offloading: This enhancement is exclusively available for NVIDIA CUDA 11.1+ enabled GPUs
+  - ⚠️ xFormers memeory efficent attentiton: This enhancement is exclusively available for NVIDIA CUDA 11.1+ enabled GPUs
 
 
 
@@ -128,6 +129,9 @@ to utilise the fixed size tiled processing will require padding edges of images 
 
 
 <div align="center">
+
+<img src="Images/" width="800"> 
+
 </div>
 
 
@@ -136,6 +140,9 @@ Additionally introdcuing tiling creates a new problem of edge artifacts. This is
 
 
 <div align="center">
+
+<img src="Images/" width="800"> 
+
 </div>
 
 
@@ -168,17 +175,29 @@ In addition to the standard hard edge blanding various soft edge feathering blen
 These allow the tiles to be blended together in a more natural way, and can be used to reduce the edge artifacts that can be seen in the standard hard edge blending method.
 You can preview and adjust the blending live once upscaling has finished to perfect your image.
 
+
 <div align="center">
+
+<img src="Images/" width="800"> 
 </div>
 
 
 
+### Boosted Face Quality
+
+Uses Haar Cascade face detection to check if faces are present in the image. This is conducted on the full image in case faces are larger than individual tiles and can not be detected by just checking the tiles. All tiles that contain part of the detected faces are processed with 2x the set number of iterations. This can be used to improve the quality of faces in the final image. This will increase the processing time of the image. This feature can either be used to provide increased face quality above the rest of the image, or to reduce processing time by reducing the number of iterations used for the rest of the image whilst retaining acceptable face reproduction. 
+
+
+
 <div align="center">
+
+<img src="Images/Haar_Cascade.jpeg" width="800"> 
+In this example we can see that in all the images where the algorythm has failed to detect the face (other than the one where half the face is covered by the hand) the face is angled. In all the sucsessfull identifications the face is pretty straight on, this seems to be a limitation of the Haar Cascade model. I have begun to deploy additional face detection models, so far google 
+
+
+Modified from Original Photo By: Andrea Piacquadio, from Pexels: https://www.pexels.com/photo/collage-photo-of-woman-3812743/
+
 </div>
-
-
-
-
 
 ## Contributions
 Contributions to this codebase are welcome! If you encounter any issues, bugs or have suggestions for improvements please open an issue or a pull request on the [GitHub repository](https://github.com/Adillwma/BackupInspector).
@@ -186,7 +205,11 @@ Contributions to this codebase are welcome! If you encounter any issues, bugs or
 ## License
 This project is not currently licensed. Please contact for more information.
 
+This project also uses the following third-party libraries:
+
 SDx4 Image Upscaler is built on top of the [Stability AI Stable Diffusion x4 Upscaler](https://huggingface.co/stabilityai/stable-diffusion-x4-upscaler) model developed by Robin Rombach and Patrick Esser. The model is licensed under the CreativeML Open RAIL++-M License. For more information, refer to the LISCENCE file.
+
+Haar Cascade Face Detection: This project uses the Haar Cascade Face Detection model, released under the MIT License.
 
 PyQt6: This project uses the PyQt6 library, released under the GPL v3.
 
