@@ -45,8 +45,12 @@ SDx4 Image Upscaler is a user-friendly Windows GUI application that leverages th
 - Data security, none of your data is sent to any third party.
 
 ## Installation
-BackupInspector is primarily developed for Windows users, and we provide a pre-packaged executable for easy installation on Windows. However, it can also be run on other operating systems by executing the Python code directly.
+BackupInspector is primarily developed for Windows users, and we provide a pre-packaged executable for easy installation on Windows. However, it can also be run on other operating systems by executing the Python code directly. Additionally the SDx4Upscaler is availbe without gui as a python class for use in your own projects. This can be installed vai pip using the following command:
 
+```shell
+pip install SDx4Upscaler
+```
+   
 ### Windows
 To install Windows_SDx4, follow these steps:
 
