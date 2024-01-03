@@ -54,8 +54,8 @@ class SDx4Upscaler(QObject):
     - tile_complete_signal: Emits (upscaled_tile_image, current_tile_number, local_image_path) at set interval of inference iterations, defined by 'callback_steps' argument, during the upscaling process for showing the user a aniamtion or preview of the tiles being added to the final image as the inference progresses
     """
     processing_position_signal = pyqtSignal(int, int, int, int)     # Emits (current tile, total tiles, current iteration, total iterations) during the upscaling process for external tracking or visulisation to users 
-    callback_signal = pyqtSignal(object, int, str)             # Emits (callback_tile_preview, current_tile_number, local_image_path) during the upscaling process for external tracking or visulisation to users
-    tile_complete_signal = pyqtSignal(object, int, str)        # Emits (upscaled_tile_image, current_tile_number, local_image_path) number of the tile that has just been upscaled
+    callback_signal = pyqtSignal(object, int)             # Emits (callback_tile_preview, current_tile_number, local_image_path) during the upscaling process for external tracking or visulisation to users
+    tile_complete_signal = pyqtSignal(object, int)        # Emits (upscaled_tile_image, current_tile_number, local_image_path) number of the tile that has just been upscaled
 
     def __init__(self, xformers=False, cpu_offload=False, attention_slicing=False, seed=None, safety_checker=None, log_level="DEBUG", log_to_file=False):
         """
@@ -192,14 +192,14 @@ class SDx4Upscaler(QObject):
                 
 
             upscaled_patches.append(upscaled_patch)
-            self.tile_complete_signal.emit(upscaled_patch, patch_num, local_image_path)
+            self.tile_complete_signal.emit(upscaled_patch, patch_num)
 
         if show_patches:
             self.visualize_patches(patches, number_of_windows_in_row, number_of_windows_in_col)
             self.visualize_patches(upscaled_patches, number_of_windows_in_row, number_of_windows_in_col)
 
         scaling_factor = upscaled_patches[0].size[0] / patches[0].size[0]   # calculate the scaling factor from the size of the first upscaled patch and the first patch
-        upscaled_image = self.reconstruct_from_patches(upscaled_patches, number_of_windows_in_row, number_of_windows_in_col, patch_size, scaling_factor, x_overlap, y_overlap, x_last_overlap, y_last_overlap, low_res_img.size, blending)
+        upscaled_image = self.reconstruct_from_patches(upscaled_patches, number_of_windows_in_row, number_of_windows_in_col, patch_size, scaling_factor, low_res_img.size, blending)
         self.logger.debug("Upscale successful")
 
         return upscaled_image
@@ -223,14 +223,14 @@ class SDx4Upscaler(QObject):
         for c in range(0, number_of_windows_in_col):
             for r in range(0, number_of_windows_in_row):
                 if r == number_of_windows_in_row - 1:
-                    x_start_point = (r * window_size) - (r * x_last_overlap * 2)
+                    x_start_point = (r * window_size) - (r * x_last_overlap)
                 else:
-                    x_start_point = (r * window_size) - (r * x_overlap * 2)
+                    x_start_point = (r * window_size) - (r * x_overlap)
 
                 if c == number_of_windows_in_col - 1:
-                    y_start_point = (c * window_size) - (c * y_last_overlap * 2)
+                    y_start_point = (c * window_size) - (c * y_last_overlap)
                 else:
-                    y_start_point = (c * window_size) - (c * y_overlap * 2)
+                    y_start_point = (c * window_size) - (c * y_overlap)
 
                 # Crop the patch from the image
                 patch = image.crop((x_start_point, y_start_point, x_start_point + window_size, y_start_point + window_size))
@@ -297,13 +297,16 @@ class SDx4Upscaler(QObject):
     def calculate_dynamic_overlap(self, x, window_size, patch_size):
         blocks = int(np.ceil(x / patch_size))
         hangover = (patch_size * blocks) - x
-        num_of_overlaps = (blocks * 2) - 2
+        num_of_overlaps = blocks - 1
         overlap = hangover / num_of_overlaps                        # length hanging over = total length of blocks end to end - length of x                     number of overlaps = number of blocks * 2  - 2 as there are 2 overlaps for every block except the first and last which only have 1. if there is only 1 block then there is no overlap
         
         # round down overlap  
         overlap = np.floor(overlap)
         all_but_one_ol = overlap * (num_of_overlaps - 1)
         last_ol = hangover - all_but_one_ol   # to make sure all are ints and there is no remainder
+
+        overlap = overlap + (window_size - patch_size)
+        last_ol = last_ol + (window_size - patch_size)
 
         return overlap, last_ol, blocks
 
@@ -340,7 +343,7 @@ class SDx4Upscaler(QObject):
         # Paste the blended image onto the result image
         background.paste(blended_image, position)
 
-    def reconstruct_from_patches(self, patches, number_of_patches_in_row, number_of_patches_in_col, patch_size, scaling_factor, x_overlap, y_overlap, x_last_overlap, y_last_overlap, original_image_shape, blending):
+    def reconstruct_from_patches(self, patches, number_of_patches_in_row, number_of_patches_in_col, patch_size, scaling_factor, original_image_shape, blending):
         scaling_factor = int(scaling_factor)
         window_size = 128 * scaling_factor
         min_padding_size = 8 * scaling_factor                                # Pixels of padding on right and bottom sides of the patches
@@ -353,24 +356,28 @@ class SDx4Upscaler(QObject):
         # Create a new image with the same mode and size as the original image
         reconstructed_image = Image.new(mode='RGB', size=[int(width), int(height)])
 
+        x_overlap, x_last_overlap, number_of_patches_in_row = self.calculate_dynamic_overlap(width, window_size, patch_size)
+        y_overlap, y_last_overlap, number_of_patches_in_col = self.calculate_dynamic_overlap(height, window_size, patch_size)
+
         # Paste each patch onto the result image
         for c in range(number_of_patches_in_col):
             for r in range(number_of_patches_in_row):
                 if r == number_of_patches_in_row - 1:
-                    x_start_point = int((r * window_size) - (r * x_last_overlap  * scaling_factor * 2))
+                    x_start_point = (r * window_size) - (r * x_last_overlap)
                 else:
-                    x_start_point = int((r * window_size) - (r * x_overlap * scaling_factor * 2))
+                    x_start_point = (r * window_size) - (r * x_overlap)
+                    
                 if c == number_of_patches_in_col - 1:
-                    y_start_point = int((c * window_size) - (c * y_last_overlap * scaling_factor * 2))
+                    y_start_point = (c * window_size) - (c * y_last_overlap)
                 else:
-                    y_start_point = int((c * window_size) - (c * y_overlap * scaling_factor * 2))
+                    y_start_point = (c * window_size) - (c * y_overlap)
 
                 if blending:
                     # Paste the patch onto the result image with blending
-                    self.blend_images(reconstructed_image, patches[c * number_of_patches_in_row + r], (x_start_point, y_start_point))
+                    self.blend_images(reconstructed_image, patches[c * number_of_patches_in_row + r], (int(x_start_point), int(y_start_point)))
                 else:
                     # Paste the patch onto the result image
-                    reconstructed_image.paste(patches[c * number_of_patches_in_row + r], (x_start_point, y_start_point))
+                    reconstructed_image.paste(patches[c * number_of_patches_in_row + r], (int(x_start_point), int(y_start_point)))
 
         return reconstructed_image
 
@@ -417,7 +424,7 @@ class SDx4Upscaler(QObject):
                 for i, img in enumerate(image):
 
                     # report that a new image is ready as a signal so outside class can execute an event 
-                    self.callback_signal.emit(img, self.patch_num, self.filepath)
+                    self.callback_signal.emit(img, self.patch_num)
 
 # Demo usage of the SDx4Upscaler class
 if __name__ == "__main__":
