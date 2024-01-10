@@ -66,17 +66,19 @@ class SDx4Upscaler(QObject):
         self.generator = torch.manual_seed(seed) if seed else None
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")    # cpu, cuda, ipu, xpu, mkldnn, opengl, opencl, ideep, hip, ve, fpga, ort, xla, lazy, vulkan, mps, meta, hpu, mtia, privateuseone
         self.pipeline = StableDiffusionUpscalePipeline.from_pretrained("stabilityai/stable-diffusion-x4-upscaler", generator=self.generator, torch_dtype=torch.float32, safety_checker=safety_checker)   #, local_files_only=True
+
+        #self.pipeline = StableDiffusionUpscalePipeline.from_pretrained(r"A:\Users\Ada\GitHub\AI_Image_Upscale_Windows\App_Data\models--stabilityai--stable-diffusion-x4-upscaler\snapshots\572c99286543a273bfd17fac263db5a77be12c4c", generator=self.generator, torch_dtype=torch.float32, safety_checker=safety_checker)   #, local_files_only=True
         self.pipeline = self.pipeline.to(self.device)   
         self.transform = transforms.ToTensor()
 
-        if xformers:
+        if xformers and self.device == "cuda":
             self.pipeline.enable_xformers_memory_efficient_attention()
-        if cpu_offload:
+        if cpu_offload and self.device == "cuda":
             self.pipeline.enable_sequential_cpu_offload()
-        if attention_slicing:
+        if attention_slicing and self.device == "cuda" and not xformers:
             self.pipeline.enable_attention_slicing()
 
-        self.use_tqdm = False  # change back to true!!!!
+        self.use_tqdm = False  # change back to true if used as a standalone class?!!!!
         self.initialise_logging(log_level, log_to_file, xformers, cpu_offload, attention_slicing)
 
     def initialise_logging(self, log_level, log_to_file, xformers, cpu_offload, attention_slicing):

@@ -6,9 +6,9 @@
 
 <img src="Images/SDX4_BANNER.png" width="800"> 
 
-    - 4x neural engine image upscaling
-    - No internet connection required
-    - Local processing, none of your data is sent to any third party.
+    - 4x resoloution neural image upscaling
+    - No internet connection required, local processing, no data sent to any third party.
+    - Advanced blended tiled processing for upscaling large images with low memory usage.
 
 [![Github Repo](https://img.shields.io/badge/GitHub_Repo-SDx4_ImageUpscaler-yellow.svg)](https://github.com/Adillwma/Windows_SDx4_ImageUpscaler)
 [![Language](https://img.shields.io/badge/language-Python-blue.svg)](https://www.python.org/)
@@ -34,18 +34,24 @@ SDx4 Image Upscaler is a user-friendly Windows GUI application that leverages th
 # Features
 - Packaged as a windows installer with no python or code dependencies.
 - Lightweight modern windows GUI to simplify usage. 
-- Batch processing upscaling ability
+- Batch processing upscaling ability.
 - Incorperates fixed tile processing to allow for large images to be upscaled with low ram usage and direct cpu processig for users without cuda gpu's whilst opperating the upscale model at its optimum resoloution.
 - Dynamic tileshifting to reduce image edge artifacts, and allow for a more accurate upscale whilst avoiding dark pixel padding or processing non image data.
-- Soft and hard edge blending selectable by user to reduce tile edge seams.
+- Edge blending methods selectable by user to reduce tile seams.
+- Haar Cascade face detection to allow for automatic increased processing quality on tiles containing faces.
+- Live preview of the image upscale during processing, each tile is updated in the preview every other iteration.
 - Ability to use the xFormers library to greatly speed up processing given a cuda gpu.            
 - Ability to use cpu offloading to allow for boosted cpu processing whilst using a cuda gpu.   
 - Ability to introduce attention slicing to reduce memory usage (not recomended, inferior to xFormers and covered by tiled processing) 
 - Local processing, no internet connection required.
 - Data security, none of your data is sent to any third party.
+- Customisable themes using the comprehensive integrated live theme designer.
+- Automatic color pallette generation using the integrated live theme designer and multiple user selectable methods, i.e. monochromatic, complementary, analogous, split complementary, triadic, tetradic.
+
+
 
 ## Installation
-BackupInspector is primarily developed for Windows users, and we provide a pre-packaged executable for easy installation on Windows. However, it can also be run on other operating systems by executing the Python code directly. Additionally the SDx4Upscaler is availbe without gui as a python class for use in your own projects. This can be installed vai pip using the following command:
+SDx4 is primarily developed for Windows users, and we provide a pre-packaged executable for easy installation on Windows. However, it can also be run on other operating systems by executing the Python code directly. Additionally the SDx4Upscaler is availbe without gui as a python class for use in your own projects. This can be installed vai pip using the following command:
 
 ```shell
 pip install SDx4Upscaler
@@ -54,7 +60,7 @@ pip install SDx4Upscaler
 ### Windows
 To install Windows_SDx4, follow these steps:
 
-1. Download the latest release of Windows_SDx4.exe from this repo using the following link: [BackupInspector Download](https://github.com/Adillwma/Windows_SDx4/raw/main/Windows_SDx4.exe)
+1. Download the latest release of Windows_SDx4.exe from this repo using the following link: [SDx4 Download](https://github.com/Adillwma/Windows_SDx4/raw/main/Windows_SDx4.exe)
 
 2. Run the downloaded 'SDx4 Image Upscaler.exe' file.
 
@@ -110,9 +116,9 @@ Advanced Settings:
 - If tile edge blending is enabled, select the desired blend mode from the drop down menu.
 
 - Configure the pipeline settings, optional but can be used to speed up processing and reduce memory usage. These enhancements are exclusively available for NVIDIA CUDA 11.1+ enabled GPUs, if a supported GPU is not detected the settings will not be applied.
-  - ⚠️ Attention slicing: When memory efficient attention and sliced attention are both enabled, memory efficient attention takes precedent. This enhancement is exclusively available for NVIDIA CUDA 11.1+ enabled GPUs
-  - ⚠️ CPU offloading: This enhancement is exclusively available for NVIDIA CUDA 11.1+ enabled GPUs
-  - ⚠️ xFormers memeory efficent attentiton: This enhancement is exclusively available for NVIDIA CUDA 11.1+ enabled GPUs
+  - ⚠️ Attention slicing: When memory efficient attention and sliced attention are both enabled, memory efficient attention takes precedent. This enhancement is exclusively available for NVIDIA CUDA 11.1+ enabled GPUs and the program will automatically disable this setting if enabled without a supported GPU.
+  - ⚠️ CPU offloading: This enhancement is exclusively available for NVIDIA CUDA 11.1+ enabled GPUs and the program will automatically disable this setting if enabled without a supported GPU.
+  - ⚠️ xFormers memeory efficent attentiton: This enhancement is exclusively available for NVIDIA CUDA 11.1+ enabled GPUs and the program will automatically disable this setting if enabled without a supported GPU.
 
 
 
@@ -203,6 +209,55 @@ Modified from Original Photo By: Andrea Piacquadio, from Pexels: https://www.pex
 
 </div>
 
+
+
+
+
+# Additional GUI Features and information
+
+## Theme Designer
+
+<div align="center">
+
+<img src="Images/themedesigner.png" width="800"> 
+The integrated 'Theme Designer' dialog UI. 
+
+
+
+
+</div>
+
+
+
+### Randomising Color Palletes
+
+#### Single Randomise
+
+
+
+#### Randomise All Unlocked
+
+- Palete selection method
+
+Auto 
+Monochromatic
+Complementary
+Analogous
+Split Complementary
+Triadic
+Tetradic
+
+
+- Locks
+<img src="Images/themedesignerLocks.png" width="800"> 
+The integrated 'Theme Designer' dialog UI. 
+
+
+
+
+</div>
+
+
 ## Contributions
 Contributions to this codebase are welcome! If you encounter any issues, bugs or have suggestions for improvements please open an issue or a pull request on the [GitHub repository](https://github.com/Adillwma/BackupInspector).
 
@@ -216,6 +271,24 @@ SDx4 Image Upscaler is built on top of the [Stability AI Stable Diffusion x4 Ups
 Haar Cascade Face Detection: This project uses the Haar Cascade Face Detection model, released under the MIT License.
 
 PyQt6: This project uses the PyQt6 library, released under the GPL v3.
+
+NSIS
+
+
+MediaPipe: This project uses the MediaPipe library, released under the Apache License 2.0.
+
+#@title Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 
 # Contact
 For any further inquiries or for assistance in running the simulation, please feel free to reach out to me at adill@neuralworkx.com.
