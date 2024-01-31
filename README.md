@@ -1,6 +1,6 @@
 <div align="center">
 
-# Windows SDx4 Image Upscaler
+# Windows SDx4 Image Upscaler v0.9.1 [BETA RELEASE]
 ### Author: Adill Al-Ashgar
 #### Stability AI's Stable Diffusion x4 Upscaler in Windows GUI Package with advanced features.
 
@@ -105,7 +105,6 @@ More information on the headless class can be found in PyPi page [SDx4UpscalerCl
 To run SDx4 Image Upscaler, follow these steps:
 
 1. Add the image(s) you wish to upscale by clicking the 'Add Images' button or add all the images in a folder at once by clicking the 'Add folder' button.
-   You can remove items added to the list by accident by selecting them on the list and clicking the 'Remove Selected' button
 
 2. Select the output directory you wish to save the upscaled image to on the right hand settings pane.
 
@@ -114,7 +113,11 @@ To run SDx4 Image Upscaler, follow these steps:
 4. ... Congratulations your image(s) are now 4x the resoloution!
 
 
+<div align="center">
 
+<img src="Images/example.png" width="800"> 
+
+</div>
 
 
 
@@ -165,19 +168,19 @@ To access the main program settings window, click the settings cog located at th
 
 
 
-
-
-
-
 ## Known Issues
 
-- The model is trained on images of a fixed size, and thus the model has no knowledge of the edges of the tiles. This can be seen in the following example: dsjhf kf . Issue Tracking Link:  [Issue #1](    )      
+- Program will use tiling even if image is smaller than a single tile. Issue Tracking Link:  [Issue #1](    )   
 
-- The model is trained on images of a fixed size, and thus the model has no knowledge of the edges of the tiles. This can be seen in the following example:
+- Users can still navigate program when images are upscaling. Issue Tracking Link:  [Issue #1](    ) 
 
-- The model is trained on images of a fixed size, and thus the model has no knowledge of the edges of the tiles. This can be seen in the following example:
+- Upscale preview stays on first image if upscaling a number of images at once. Issue Tracking Link:  [Issue #1](    ) 
 
-- The model is trained on images of a fixed size, and thus the model has no knowledge of the edges of the tiles. This can be seen in the following example:
+- Upscale preview is out of sync with progress bar. Issue Tracking Link:  [Issue #1](    ) 
+
+- Users are able to select settings that are not simultaneously usable. Issue Tracking Link:  [Issue #1](    )
+
+
 
 
 
