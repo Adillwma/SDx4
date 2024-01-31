@@ -1,0 +1,10 @@
+opencv-python==4.5.3.56
+torch==1.10.0
+numpy==1.21.2
+tqdm==4.62.2
+matplotlib==3.4.3
+Pillow==8.2.0
+diffusers==0.1.0
+PyQt6==6.1.2
+requests==2.26.0
+

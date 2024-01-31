@@ -36,7 +36,7 @@ SDx4 Image Upscaler is a user-friendly native Windows program that leverages the
 - Packaged as a windows program with no dependencies or need to see code.
 - Lightweight modern GUI. 
 - Batch processing upscaling ability.
-- Incorperates fixed tile processing to allow for large images to be upscaled with low ram usage whilst opperating the upscale model at its optimum input resoloution.
+- Incorperates fixed tile processing to allow for large images to be upscaled with low ram usage whilst opperating the upscale model at its optimum input   resoloution.
 - Local processing, no internet connection required, none of your data is sent to any third party.
 - Customisable themes using the comprehensive integrated live theme designer.
 
@@ -170,15 +170,21 @@ To access the main program settings window, click the settings cog located at th
 
 ## Known Issues
 
-- Program will use tiling even if image is smaller than a single tile. Issue Tracking Link:  [Issue #1](    )   
+- GUI becomes non responsive while downloading the model from the huggingface server on first run. 
 
-- Users can still navigate program when images are upscaling. Issue Tracking Link:  [Issue #1](    ) 
+   Issue Tracking Link: [Issue #1](https://github.com/Adillwma/AI_Image_Upscale_Windows_GUI/issues/1)
 
-- Upscale preview stays on first image if upscaling a number of images at once. Issue Tracking Link:  [Issue #1](    ) 
+- Program will use tiling even if image is smaller than a single tile. 
 
-- Upscale preview is out of sync with progress bar. Issue Tracking Link:  [Issue #1](    ) 
+   Issue Tracking Link: [Issue #2](https://github.com/Adillwma/AI_Image_Upscale_Windows_GUI/issues/2)   
 
-- Users are able to select settings that are not simultaneously usable. Issue Tracking Link:  [Issue #1](    )
+- Users can still navigate program when images are upscaling. 
+
+   Issue Tracking Link: [Issue #3](https://github.com/Adillwma/AI_Image_Upscale_Windows_GUI/issues/3) 
+
+- Upscale preview stays on first image if upscaling a number of images at once. 
+
+   Issue Tracking Link: [Issue #4](https://github.com/Adillwma/AI_Image_Upscale_Windows_GUI/issues/4) 
 
 
 
@@ -274,52 +280,64 @@ The integrated 'Theme Designer' dialog UI.
 
 </div>
 
-- Single Randomise
+#### Randomise single element
+Each of the theme elements can be randomised individually by clicking the 'R' button on the square you wish to randomise. This will select a random colour for the element, and will not affect any other elements.
 
-- Lock
+#### Lock
+Each of the theme elements can be locked individually by clicking the 'Lock' button on the square you wish to lock. This will lock the colour of the element, preventing it from being randomised when the 'Randomise All Unlocked' button is pressed. 
 
-- Load Base Theme
+#### Load Base Theme
+Clicking the 'Load Base Theme' button will let you select a saved theme to use as a starting point, this will loose any changes you have made so make sure to save your theme first if you wish to keep it before loading.
 
-- Randomise All Unlocked
+#### Randomise All Unlocked
+Clicking the 'Randomise All Unlocked' button will randomise all the unlocked theme elements, this will not affect any locked elements.
 
-- Save Theme
+#### Save Theme
+Before you click the button make sure to enter a unique name for your theme in the box. Clicking the 'Save Theme' button will let you save your theme. Once saved, the theme then will be availible to select in the main program theme selection dropdown alongside with the built in themes.
 
 
 ## License
-This project is not currently licensed. Please contact for more information.
-
-
+This project is released under the GPL v3 license. For more information, please refer to the LICENSE file.
 
 This project also uses the following third-party libraries, please refer to the individual liscences for more information:
 
-### [Stability AI Stable Diffusion x4 Upscaler](https://huggingface.co/stabilityai/stable-diffusion-x4-upscaler)
-- Description: SDx4 Image Upscaler is built on top of the [Stability AI Stable Diffusion x4 Upscaler](https://huggingface.co/stabilityai/stable-diffusion-x4-upscaler) model developed by Robin Rombach and Patrick Esser. The model is licensed under the CreativeML Open RAIL++-M License. For more information, refer to the LISCENCE file.
-- License: [Link to License for Library 1]
+- [Stability AI Stable Diffusion x4 Upscaler](https://huggingface.co/stabilityai/stable-diffusion-x4-upscaler) License: [Link to License for Library 1] CreativeML Open RAIL++-M License.
 
-### [Haar Cascade Face Detection]()
-- Description: Haar Cascade Face Detection: This project uses the Haar Cascade Face Detection model, released under the MIT License.
-- License: [Link to License for Library 2]
+- [Haar Cascade Face Detection]() License: [Link to License for Library 2]MIT License.
 
-### [MediaPipe library]()
-- Description: MediaPipe: This project uses the MediaPipe library, released under the Apache License 2.0.
-- License: https://www.apache.org/licenses/LICENSE-2.0
+- [MediaPipe library]() License: https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0.
 
-### [PyQt6]()
-- Description: This project uses the PyQt6 library, released under the GPL v3.
-- License: [Link to License for Library 2]
+- [PyQt6]() License: [Link to License for Library 2]GPL v3
 
-### [NSIS]()
-- Description: NSIS
-- License: [Link to License for Library 2]
+- [NSIS]()   License: [Link to License for Library 2]
+
+This project uses the following Python libraries:
+
+- [opencv-python](https://pypi.org/project/opencv-python/) License: [OpenCV License](https://github.com/opencv/opencv/blob/master/LICENSE)
+
+- [torch](https://pypi.org/project/torch/) License: [PyTorch License](https://github.com/pytorch/pytorch/blob/master/LICENSE)
+
+- [numpy](https://pypi.org/project/numpy/) License: [NumPy License](https://numpy.org/doc/stable/license.html)
+
+- [tqdm](https://pypi.org/project/tqdm/) License: [MIT License](https://github.com/tqdm/tqdm/blob/main/LICENCE)
+
+- [matplotlib](https://pypi.org/project/matplotlib/) License: [Matplotlib License](https://github.com/matplotlib/matplotlib/blob/main/LICENSE/LICENSE)
+
+- [Pillow](https://pypi.org/project/Pillow/) License: [PIL License](https://pillow.readthedocs.io/en/stable/releasenotes/8.2.0.html#licensing)
+
+- [diffusers](https://pypi.org/project/diffusers/) License: [Specify the license if available]
+
+- [PyQt6](https://pypi.org/project/PyQt6/) License: [Riverbank Commercial License](https://www.riverbankcomputing.com/static/Docs/PyQt6/licensing.html)
+
+- [requests](https://pypi.org/project/requests/) License: [Apache License 2.0](https://github.com/psf/requests/blob/main/LICENSE)
+
 
 
 ## Contributions
 Contributions to this codebase are welcome! If you encounter any issues, bugs or have suggestions for improvements please open an issue or a pull request on the [GitHub repository](https://github.com/Adillwma/BackupInspector).
 
-
 ## Contact
 For any further inquiries or for assistance in running the simulation, please feel free to reach out to me at adill@neuralworkx.com.
-
 
 ## Donations
 If you find this project useful, or implement it in your own work, please consider donating a coffee which is the liquid that fuels this project and more!

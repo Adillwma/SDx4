@@ -305,11 +305,11 @@ class UpscalePreviewThread(QThread):
 
 
 #%%  - Load the UI file
-Form, Window = uic.loadUiType("SDx4_interface.ui")
+Form, Window = uic.loadUiType("GUI\SDx4_interface.ui")
 app = QApplication([])
 
 from PyQt6.QtWidgets import  QDialog
-from clickablewidget import ClickableWidget
+from GUI.clickablewidget import ClickableWidget
 
 
 class ThemeDesigner(QDialog):
