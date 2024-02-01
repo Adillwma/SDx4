@@ -63,9 +63,8 @@ class SDx4Upscaler(QObject):
         logging will go to console if log_to_file is False, otherwise it will go to a file called SDx4Upscaler.log
         """
         super().__init__()  # Call the __init__ method of the parent class
-        self.generator = torch.manual_seed(seed) if seed else None
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")    # cpu, cuda, ipu, xpu, mkldnn, opengl, opencl, ideep, hip, ve, fpga, ort, xla, lazy, vulkan, mps, meta, hpu, mtia, privateuseone
-        self.pipeline = StableDiffusionUpscalePipeline.from_pretrained("stabilityai/stable-diffusion-x4-upscaler", generator=self.generator, torch_dtype=torch.float32, safety_checker=safety_checker)   #, local_files_only=True
+        self.pipeline = StableDiffusionUpscalePipeline.from_pretrained("stabilityai/stable-diffusion-x4-upscaler", torch_dtype=torch.float32, safety_checker=safety_checker)   #, local_files_only=True
 
         #self.pipeline = StableDiffusionUpscalePipeline.from_pretrained(r"A:\Users\Ada\GitHub\AI_Image_Upscale_Windows\App_Data\models--stabilityai--stable-diffusion-x4-upscaler\snapshots\572c99286543a273bfd17fac263db5a77be12c4c", generator=self.generator, torch_dtype=torch.float32, safety_checker=safety_checker)   #, local_files_only=True
         self.pipeline = self.pipeline.to(self.device)   
@@ -150,72 +149,101 @@ class SDx4Upscaler(QObject):
         
         """
         
-        
+        self.face_modifier = 2  #face_modifier move to user input
         self.callback_steps = callback_steps
         self.filepath = local_image_path
-        # specify local image path
         low_res_img = Image.open(local_image_path).convert("RGB")
-        face_modifier = 2
 
-        #  Split the input image into patches of shape (patch_size, patch_size), if there are patches of the image which do not fit into the patch grid, flip the image and continue it from the edge of the image to fill the patch grid.  
-        patches, number_of_windows_in_row, number_of_windows_in_col, patch_size, x_overlap, y_overlap, x_last_overlap, y_last_overlap, face_in_patch_list = self.split_image_into_patches(low_res_img, boost_face_quality)
-        
-        self.number_of_patches = len(patches)
-        self.logger.info(f"number of patches to process: {self.number_of_patches}")
+        # add face check here 
+        if boost_face_quality:
+            # check image for faces
+            check_for_face_result, faces, facedetection_boundingboxes_debugimage = self.check_for_faces(low_res_img)
 
-        upscaled_patches = []
-
-        if self.use_tqdm:
-            iterator = tqdm(enumerate(patches), total=len(patches), desc="Upscaling patches", leave=True, unit="patch", colour='green')
-        else:
-            iterator = enumerate(patches)
-
-        for patch_num, patch in iterator:
-            self.patch_num = patch_num
-
-            if dummy_upscale:
-                # strecth the patch to 4x its size
-                upscaled_patch = patch.resize(((patch_size + padding_size) * 4, (patch_size + padding_size) * 4), Image.BICUBIC)
+            if check_for_face_result:
+                # increase num_inference_steps
+                self.num_inference_steps_used = num_inference_steps * self.face_modifier
+                self.logger.info(f"increasing num_inference_steps to: {num_inference_steps}")
             
             else:
-                if boost_face_quality and face_in_patch_list[patch_num]:
-                    self.num_inference_steps_used = num_inference_steps * face_modifier
-                    self.logger.debug(f"face detected in patch, increasing num_inference_steps to: {self.num_inference_steps_used}")
-                else:
-                    self.num_inference_steps_used = num_inference_steps
+                self.num_inference_steps_used = num_inference_steps
+                self.logger.info(f"no faces detected, using num_inference_steps: {num_inference_steps}")
 
-                upscaled_patch = self.pipeline(prompt=prompt, 
-                                                image=patch, 
-                                                num_inference_steps=self.num_inference_steps_used, 
-                                                guidance_scale=guidance_scale, 
-                                                negative_prompt=negative_prompt,
-                                                callback=self.callback, 
-                                                callback_steps=1).images[0]   
+        else:
+            check_for_face_result = False
+            faces = []
+            facedetection_boundingboxes_debugimage = None
+            self.num_inference_steps_used = num_inference_steps
+
+
+
+
+        if low_res_img.size[0] <= (patch_size + padding_size) and low_res_img.size[1] <= (patch_size + padding_size):   # check if image is smaller than window size in whcxh case just upscale it
+            # if image is smaller than patch size then just upscale it
+            upscaled_image = self.pipeline(prompt=prompt, 
+                                            image=low_res_img, 
+                                            num_inference_steps=self.num_inference_steps_used, 
+                                            guidance_scale=guidance_scale, 
+                                            negative_prompt=negative_prompt).images[0]
+                                            #callback=self.callback, 
+                                            #callback_steps=1).images[0]   
+
+        else:
+            #  Split the input image into patches of shape (patch_size, patch_size), if there are patches of the image which do not fit into the patch grid, flip the image and continue it from the edge of the image to fill the patch grid.  
+            patches, number_of_windows_in_row, number_of_windows_in_col, patch_size, x_overlap, y_overlap, x_last_overlap, y_last_overlap, face_in_patch_list = self.split_image_into_patches(low_res_img, boost_face_quality, check_for_face_result, faces)
+            
+            self.number_of_patches = len(patches)
+            self.logger.info(f"number of patches to process: {self.number_of_patches}")
+
+            upscaled_patches = []
+
+            if self.use_tqdm:
+                iterator = tqdm(enumerate(patches), total=len(patches), desc="Upscaling patches", leave=True, unit="patch", colour='green')
+            else:
+                iterator = enumerate(patches)
+
+            for patch_num, patch in iterator:
+                self.patch_num = patch_num
+
+                if dummy_upscale:
+                    # strecth the patch to 4x its size
+                    upscaled_patch = patch.resize(((patch_size + padding_size) * 4, (patch_size + padding_size) * 4), Image.BICUBIC)
                 
+                else:
+                    if boost_face_quality and face_in_patch_list[patch_num]:
+                        self.num_inference_steps_used = num_inference_steps * self.face_modifier
+                        self.logger.debug(f"face detected in patch, increasing num_inference_steps to: {self.num_inference_steps_used}")
+                    else:
+                        self.num_inference_steps_used = num_inference_steps
 
-            upscaled_patches.append(upscaled_patch)
-            self.tile_complete_signal.emit(upscaled_patch, patch_num)
+                    upscaled_patch = self.pipeline(prompt=prompt, 
+                                                    image=patch, 
+                                                    num_inference_steps=self.num_inference_steps_used, 
+                                                    guidance_scale=guidance_scale, 
+                                                    negative_prompt=negative_prompt,
+                                                    callback=self.callback, 
+                                                    callback_steps=1).images[0]   
+                    
 
-        if show_patches:
-            self.visualize_patches(patches, number_of_windows_in_row, number_of_windows_in_col)
-            self.visualize_patches(upscaled_patches, number_of_windows_in_row, number_of_windows_in_col)
+                upscaled_patches.append(upscaled_patch)
+                self.tile_complete_signal.emit(upscaled_patch, patch_num)
 
-        scaling_factor = upscaled_patches[0].size[0] / patches[0].size[0]   # calculate the scaling factor from the size of the first upscaled patch and the first patch
-        upscaled_image = self.reconstruct_from_patches(upscaled_patches, number_of_windows_in_row, number_of_windows_in_col, patch_size, scaling_factor, low_res_img.size, blending)
+            if show_patches:
+                self.visualize_patches(patches, number_of_windows_in_row, number_of_windows_in_col)
+                self.visualize_patches(upscaled_patches, number_of_windows_in_row, number_of_windows_in_col)
+
+            scaling_factor = upscaled_patches[0].size[0] / patches[0].size[0]   # calculate the scaling factor from the size of the first upscaled patch and the first patch
+            upscaled_image = self.reconstruct_from_patches(upscaled_patches, number_of_windows_in_row, number_of_windows_in_col, patch_size, scaling_factor, low_res_img.size, blending)
+       
         self.logger.debug("Upscale successful")
 
         return upscaled_image
 
-    def split_image_into_patches(self, image, boost_face_quality):
+    def split_image_into_patches(self, image, boost_face_quality, check_for_face_result, faces):
         # rather than the following tow being set directly there shoudl always be a sum of 128 and then the padding size should be chosen which will then take away from that 128 leaving the patch_width as the remainder
         window_size = 128
         min_padding_size = 8                      # Pixels of padding on right and bottom sides of the patches
         patch_size = window_size - min_padding_size        # Size of the patches to be extracted from the image in pixels
         input_image_width, input_image_height = image.size
-
-        if boost_face_quality:
-            # check image for faces
-            check_for_face_result, faces, facedetection_boundingboxes_debugimage = self.check_for_faces(image)
 
         x_overlap, x_last_overlap, number_of_windows_in_row = self.calculate_dynamic_overlap(input_image_width, window_size, patch_size)
         y_overlap, y_last_overlap, number_of_windows_in_col = self.calculate_dynamic_overlap(input_image_height, window_size, patch_size)

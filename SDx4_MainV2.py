@@ -1448,7 +1448,7 @@ class MainWindow(QMainWindow):
         # Calulate the percentage of images, tiles and iterations processed
         image_percentage = int((image_num-1 / total_images) * 100)            
         tile_percentage = int((tile_num / total_tiles) * 100)            
-        iteration_percentage = int((iteration_num / total_iterations) * 100)          
+        iteration_percentage = int(((iteration_num + 1) / total_iterations) * 100)          
         
         # Update the progress bars if the values have changed
         if self.ui.imageProgressBar.value() != image_percentage:

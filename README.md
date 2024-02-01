@@ -63,7 +63,6 @@ To install SDx4 for Windows, follow these steps:
 
 4. Enjoy your upscaled images! (For tips or help using the program see the [Usage](#usage) section below)
 
-
 ### Linux / MacOS / Other Operating Systems
 SDx4 is primarily developed for Windows. However, it can also be run on other operating systems by executing the Python code directly. 
 To run SDx4 Image Upscaler on other operating systems, follow these steps:
@@ -112,61 +111,59 @@ To run SDx4 Image Upscaler, follow these steps:
 
 4. ... Congratulations your image(s) are now 4x the resoloution!
 
-
 <div align="center">
 
 <img src="Images/example.png" width="800"> 
 
 </div>
 
-
-
 ### Advanced Upscale Settings:
 
 For more settings you can click the 'Advanced Mode' button to open the full upscale settings panel.
 
-- Select the desired number of iterations using the slider. The higher the number of iterations the longer it will take to process each image, usually the more iterations used the better the upscale will be.
+#### Iterations
+- Select the desired number of iterations using the slider. The higher the number of iterations the longer it will take to process each image, usually the more iterations used the better the upscale will be. Default is 50 iterations.
 
+#### Boost Face Quality
 - Enabling the "Boost Face Quality" will attempt to automatically detect faces in the image and process tiles that contain faces with 2x the set number of iterations. The upscaling struggles the most with reproducing human faces, so this can be used to improve the quality of faces in the final image. This will increase the processing time of the image. This feature can either be used to provide increased face quality above the rest of the image, or to reduce processing time by reducing the number of iterations used for the rest of the image whilst retaining acceptable face reproduction, these have both been quantified later in the readme in the [Boosted Face Quality](#boosted-face-quality) section.
 
+#### Guidance Scale
 - Set the Guidance Scale value. This controll how much the upscale is affected by the text prompt and negative prompt. Setting to 0 gives no effect from the prompts and the cleanest upscale in our opinion! Although your own results may vary. 
 
+#### Text Prompt
 - If you set the guidance scale > 0 you can enter a text prompt to guide the upscale. This can be anything you like, but we recomend a short description of the image. For example if you are upscaling a picture of a cat you could enter 'A picture of a cat'. This will help the upscale to focus on the cat and not the background.
 
+#### Negative Text Prompt
 - Similarly you can enter a negative prompt to guide the upscale away from certain things. For example you can enter tems like 'text' or 'noise' to gently guide the upscale away from certain things, with varyiing degrees of succcess. 
 
+#### Tile Edge Blending
 - Enable or disable tile edge blanding by clicking the 'Enable Tile Edge Blending' button. (Can be changed after upscale???)
 
 - If tile edge blending is enabled, select the desired blend mode from the drop down menu.
 
+#### Pipeline Settings
 - Configure the pipeline settings, optional but can be used to speed up processing and reduce memory usage. These enhancements are exclusively available for NVIDIA CUDA 11.1+ enabled GPUs, if a supported GPU is not detected the settings will not be applied.
   - ⚠️ Attention slicing: When memory efficient attention and sliced attention are both enabled, memory efficient attention takes precedent. This enhancement is exclusively available for NVIDIA CUDA 11.1+ enabled GPUs and the program will automatically disable this setting if enabled without a supported GPU.
   - ⚠️ CPU offloading: This enhancement is exclusively available for NVIDIA CUDA 11.1+ enabled GPUs and the program will automatically disable this setting if enabled without a supported GPU.
   - ⚠️ xFormers memeory efficent attentiton: This enhancement is exclusively available for NVIDIA CUDA 11.1+ enabled GPUs and the program will automatically disable this setting if enabled without a supported GPU.
 
+### Program Settings:
 
+To access the main program settings window, click the settings cog located at the bottom left of the UI. 
 
+<div align="center">
 
+<img src="Images/Settings.png" width="70"> 
 
+</div>
 
-
-
-
-
-### Program Settings
-
-To access the main program settings window, click the settings cog located at the bottom left of the UI. This will open the settings window where you can configure the following settings:
+This will open the settings window where you can configure the following settings:
 
 - Set the program theme from list of availible themes.
 
 - Open the integrated Theme Designer to create your own custom theme with live preview on the UI.
 
 - Check for porgram updates, and download and install them if availible.
-
-
-
-
-
 
 ## Known Issues
 
@@ -194,31 +191,19 @@ To access the main program settings window, click the settings cog located at th
 ## Methods
 
 ### Tiled Processing
-128, 256, 512!!!
+Previous implementations of the Stable Diffusion x4 Upscaler I have found have all been wonderfull however are limited by the amount of memory (RAM or VRAM depending on compute device) available on the system. To upscale very large images the memory usage can become extreamaly high, and in some cases exceed the available memory on the system, particuallrly when run on a consumer platform with low system memory. To overcome this memory limitation i have implemented 'tiled processing'. Tiled processing involves splitting the image into tiles of a smaller size, upscaling each tile individually and then recombining them for the final output. This allows for the upscaling of very large images with low memory usage, although does come with the downside of increased processing time.
 
+We use a fixed tile size which is user selectable between 128, 256, 512 and 1024 pixels. Smaller tile sizes will use less memory but will increase processing time. I have not performed proper testing to determine the optimal tile size for the model, however the model was trained on 512x512 images so it is likely that 512 is the optimal tile size in terms of output quality. 
 
-To upscale very large images the memory usage can become extreamaly high, and in some cases exceed the available memory on the system, particuallrly when run on a consumer cpu with low system memory. To overcome this tiled processing is used. Tiled processing involves splitting the image into tiles of a smaller size, upscaling each tile individually and then recombining them for the final output. This allows for the upscaling of very large images with low memory usage and on bare CPU metal with no CUDA.
+(NOTE: For input images that are smaller than the selected tile size the processor will abandon a tiled approach and process the image as a whole in one pass.)
 
-To get ideal image upscale it is best to stick to the input image size the model was trained on. To this end using a fixed tile size reagrless of the image is the way to ensure each upscale is as accurate as possible. 
-
-to utilise the fixed size tiled processing will require padding edges of images which are not divisible by the tile size. This adds additional processing time as we are essentilly adding a buncvh of new pixels that need to be processed and have no image data in them so we know they are worthless already. Additonally this imethod itroduces image artifacts in those tiles that have a large proportion of padding in them vs image content as can be seen in the following example:
-
+Fixed size tiled processing neccesitates padding edges of any input images that have dimensions not divisible by the tile size. This amounts to adding a bunch of new 0 value pixels that need to be processed yet have no use. Additonally this method introduces image artifacts in those tiles at the edges that have padding in them, as can be seen in the following examples:
 
 <div align="center">
 
 <img src="Images/" width="800"> 
 
 </div>
-
-Additionally introdcuing tiling creates a new problem of edge artifacts. This is due to the fact that the model is trained on images that are not tiled, and thus the model has no knowledge of the edges of the tiles. This can be seen in the following example:
-
-
-<div align="center">
-
-<img src="Images/" width="800"> 
-
-</div>
-
 
 ### Dynamic Tileshifting
 To overcome the issues with a simple tiling strategy descrived above, I developed a method of dynamic tileshifting where a number of tiles are selected to cover the image as before, taking into account the padding size, however with the tiles bounded to the image, and the padding dynamically calculated for each tile based on a minimum target overlap set by user.
@@ -243,13 +228,10 @@ In addition to the standard hard edge blanding various soft edge feathering blen
 These allow the tiles to be blended together in a more natural way, and can be used to reduce the edge artifacts that can be seen in the standard hard edge blending method.
 You can preview and adjust the blending live once upscaling has finished to perfect your image.
 
-
 <div align="center">
 
 <img src="Images/" width="800"> 
 </div>
-
-
 
 ### Boosted Face Quality
 
@@ -263,10 +245,7 @@ In this example we can see that in all the images where the algorythm has failed
 Modified from Original Photo By: Andrea Piacquadio, from Pexels: https://www.pexels.com/photo/collage-photo-of-woman-3812743/
 
 </div>
-
-I have begun to deploy additional face detection models, so far google mediapipe is incoperated and will be usable in the next working release.
-
-
+Haar cascades, introduced by Viola and Jones in 2001 paper "Rapid Object Detection using a Boosted Cascade of Simple Features", is one of the most popular object detection algorithm. Many algorithms have since surpassed Haar cascades accuracy (HOG + Linear SVM, SSDs, Faster R-CNN, YOLO etc.), but they are still relevant and useful today. One of the primary benefits of Haar cascades is that they are very fast. However, they tend to be prone to false-positive detections and are not as accurate as the more “modern” algorithms we have today. I have begun to deploy additional face detection models, so far Google Mediapipe is incoperated and will be usable in the next working release.
 
 # Additional GUI Features and information
 
@@ -294,7 +273,6 @@ Clicking the 'Randomise All Unlocked' button will randomise all the unlocked the
 
 #### Save Theme
 Before you click the button make sure to enter a unique name for your theme in the box. Clicking the 'Save Theme' button will let you save your theme. Once saved, the theme then will be availible to select in the main program theme selection dropdown alongside with the built in themes.
-
 
 ## License
 This project is released under the GPL v3 license. For more information, please refer to the LICENSE file.
@@ -331,8 +309,6 @@ This project uses the following Python libraries:
 
 - [requests](https://pypi.org/project/requests/) License: [Apache License 2.0](https://github.com/psf/requests/blob/main/LICENSE)
 
-
-
 ## Contributions
 Contributions to this codebase are welcome! If you encounter any issues, bugs or have suggestions for improvements please open an issue or a pull request on the [GitHub repository](https://github.com/Adillwma/BackupInspector).
 
@@ -344,20 +320,6 @@ If you find this project useful, or implement it in your own work, please consid
 
 <div align="center">
 
-<a href="https://www.buymeacoffee.com/adillwma" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="200" ></a>
+<a href="https://www.buymeacoffee.com/neuralworkx" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="200" ></a>
 
 </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
