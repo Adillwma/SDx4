@@ -11,11 +11,15 @@ from PIL import Image, ImageDraw, ImageFont
 from PyQt6.QtGui import QIcon, QPixmap, QPainter, QColor
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from PyQt6.QtCore import QPropertyAnimation, QEasingCurve, QThread, pyqtSignal, Qt
-from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog, QVBoxLayout, QColorDialog
+from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog, QVBoxLayout, QColorDialog, QDialog
 
 
-
-
+## - As building a exe file with no console, transformers library will suffer from an error where sys.stdout and sys.stderr are None
+# Below four lines fix this issue by redirecting stdout and stderr to os.devnull as suggested here: https://github.com/huggingface/transformers/issues/24047#issuecomment-1635532509
+if sys.stdout is None:
+    sys.stdout = open(os.devnull, "w")
+if sys.stderr is None:
+    sys.stderr = open(os.devnull, "w")
 
 #from customWidgets import CustomToggle, CustomIcon
 import resources_rc
@@ -29,14 +33,6 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 #%% - Backend Program Functions
-
-## - As building a exe file with no console, transformers library will suffer from an error where sys.stdout and sys.stderr are None
-# Below four lines fix this issue by redirecting stdout and stderr to os.devnull as suggested here: https://github.com/huggingface/transformers/issues/24047#issuecomment-1635532509
-if sys.stdout is None:
-    sys.stdout = open(os.devnull, "w")
-if sys.stderr is None:
-    sys.stderr = open(os.devnull, "w")
-
 from SDx4_Upscaler_Class import SDx4Upscaler
 
 class FileHandlingThread(QThread):
@@ -308,7 +304,6 @@ class UpscalePreviewThread(QThread):
 Form, Window = uic.loadUiType("GUI\SDx4_interface.ui")
 app = QApplication([])
 
-from PyQt6.QtWidgets import  QDialog
 from GUI.clickablewidget import ClickableWidget
 
 
@@ -732,7 +727,6 @@ class ExitDialog(QDialog):
     def reject(self):
         self.accepted = False
         super().reject()
-
 
 class CancelUpscaleDialog(QDialog):
     def __init__(self, parent=None):

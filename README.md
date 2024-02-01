@@ -2,7 +2,7 @@
 
 # Windows SDx4 Image Upscaler v0.9.1 [BETA RELEASE]
 ### Author: Adill Al-Ashgar
-#### Stability AI's Stable Diffusion x4 Upscaler in Windows GUI Package with advanced features.
+#### Stability AI's Stable Diffusion x4 Upscaler in Locally Executable Windows GUI Package with advanced features.
 
 <img src="Images/SDX4_BANNER.png" width="800"> 
 
@@ -15,7 +15,7 @@
 </div>
 
 ## Introduction
-SDx4 Image Upscaler is a user-friendly native Windows program that leverages the power of the [Stable Diffusion x4 Upscaler](https://huggingface.co/stabilityai/stable-diffusion-x4-upscaler) model developed by [Stability AI](https://stability.ai/). This package is designed to provide a seamless, lightweight, and secure way to upscale your images with cutting edge neural upscaling. The package is bundled as a Windows installer, eliminating the need for Python or any additional code dependencies. Happy enhancing!
+SDx4 Image Upscaler is a user-friendly native Windows program that leverages the power of the [Stable Diffusion x4 Upscaler](https://huggingface.co/stabilityai/stable-diffusion-x4-upscaler) model developed by [Stability AI](https://stability.ai/). This package is designed to provide a seamless, lightweight, and secure way to upscale your images with cutting edge neural upscaling. The package is bundled as a Windows installer, eliminating the need for Python or any additional code dependencies and includes smart tiled processing to massivly reduce the RAM/VRAM requirments for processing large images. Happy enhancing!
 
 ## Table of Contents
 - [Features](#features)
@@ -195,7 +195,7 @@ This will open the settings window where you can configure the following setting
 ### Tiled Processing
 Previous implementations of the Stable Diffusion x4 Upscaler I have found have all been wonderfull however are limited by the amount of memory (RAM or VRAM depending on compute device) available on the system. To upscale very large images the memory usage can become extreamaly high, and in some cases exceed the available memory on the system, particuallrly when run on a consumer platform with low system memory. To overcome this memory limitation i have implemented 'tiled processing'. Tiled processing involves splitting the image into tiles of a smaller size, upscaling each tile individually and then recombining them for the final output. This allows for the upscaling of very large images with low memory usage, although does come with the downside of increased processing time.
 
-We use a fixed tile size which is user selectable between 128, 256, 512 and 1024 pixels. Smaller tile sizes will use less memory but will increase processing time. I have not performed proper testing to determine the optimal tile size for the model, however the model was trained on 512x512 images so it is likely that 512 is the optimal tile size in terms of output quality. 
+We use a fixed tile size which is user selectable between 128, 256, 512 and 1024 pixels. Smaller tile sizes will use less memory but will increase processing time. Proper testing to determine the optimal tile size has not been conducted yet, however the model was trained on 512x512 images so it is likely that 512 is the optimal tile size in terms of output quality. 
 
 (NOTE: For input images that are smaller than the selected tile size the processor will abandon a tiled approach and process the image as a whole in one pass.)
 
@@ -210,7 +210,7 @@ The same tile shown using a black padding (left) and a my dynamic shift (right).
 </div>
 
 ### Dynamic Tileshifting
-To overcome the issues with a simple tiling strategy descrived above, I developed a method of dynamic tileshifting where a number of tiles are selected to cover the image as before, taking into account the padding size, however with the tiles bounded to the image, and the padding dynamically calculated for each tile based on a minimum target overlap set by user.
+To overcome the issues with a simple tiling strategy descrived above, SDx4 is built round a method of dynamic tileshifting where a number of tiles are selected to cover the image as before, taking into account the padding size, however with the tiles bounded to the image, and the padding dynamically calculated for each tile based on a minimum target overlap set by user.
 
 Every tile therfore is filled with image data, solving the distortion due to tiles full of padding on the right and bottom edge of the image.
 
@@ -220,7 +220,7 @@ This does mean we are processing pixels of the image multiple times for no reaso
 Currenlty the implementation of tiles processing can cause visible seams between tiles, as shown in the following example: 
 
 
-To overcome this I have begun implementing a method of feathered patching where the tiles are blended together at the edges to reduce the visibility of the seams which will be a part of the next update. This is done by blending the edges of the tiles with the edges of the adjacent tiles. The blending is done using a user selectable blending mode,
+To overcome this a new method of feathered patching where the tiles are blended together at the edges to reduce the visibility of the seams which will be a part of the next update. This is done by blending the edges of the tiles with the edges of the adjacent tiles. The blending is done using a user selectable blending mode,
 
 -Additive
 -Subtractive
@@ -254,7 +254,7 @@ In this example we can see that in all the images where the algorythm has failed
 Modified from Original Photo By: Andrea Piacquadio, from Pexels: https://www.pexels.com/photo/collage-photo-of-woman-3812743/
 
 </div>
-Haar cascades, introduced by Viola and Jones in 2001 paper "Rapid Object Detection using a Boosted Cascade of Simple Features", is one of the most popular object detection algorithm. Many algorithms have since surpassed Haar cascades accuracy (HOG + Linear SVM, SSDs, Faster R-CNN, YOLO etc.), but they are still relevant and useful today. One of the primary benefits of Haar cascades is that they are very fast. However, they tend to be prone to false-positive detections and are not as accurate as the more “modern” algorithms we have today. I have begun to deploy additional face detection models, so far Google Mediapipe is incoperated and will be usable in the next working release.
+Haar cascades, introduced by Viola and Jones in 2001 paper "Rapid Object Detection using a Boosted Cascade of Simple Features", is one of the most popular object detection algorithm. Many algorithms have since surpassed Haar cascades accuracy (HOG + Linear SVM, SSDs, Faster R-CNN, YOLO etc.), but they are still relevant and useful today. One of the primary benefits of Haar cascades is that they are very fast. However, they tend to be prone to false-positive detections and are not as accurate as the more “modern” algorithms we have today. Work has begun to deploy additional face detection models, so far Google Mediapipe is incoperated and will be usable in the next working release.
 
 # Additional GUI Features and information
 
@@ -288,35 +288,28 @@ This project is released under the GPL v3 license. For more information, please 
 
 This project also uses the following third-party libraries, please refer to the individual liscences for more information:
 
-- [Stability AI Stable Diffusion x4 Upscaler](https://huggingface.co/stabilityai/stable-diffusion-x4-upscaler) License: [Link to License for Library 1] CreativeML Open RAIL++-M License.
+- [Stability AI Stable Diffusion x4 Upscaler](https://huggingface.co/stabilityai/stable-diffusion-x4-upscaler) License: [CreativeML Open RAIL++-M License](https://huggingface.co/stabilityai/stable-diffusion-2/blob/main/LICENSE-MODEL)
 
-- [Haar Cascade Face Detection]() License: [Link to License for Library 2]MIT License.
+- [PyQt6](https://pypi.org/project/PyQt6/) License: [GNU 3](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
-- [MediaPipe library]() License: https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0.
+- [MediaPipe library]() License: [Apache 2.0](https://github.com/google/mediapipe/blob/master/LICENSE)
 
-- [PyQt6]() License: [Link to License for Library 2]GPL v3
+- [diffusers](https://pypi.org/project/diffusers/) License: [Apache 2.0](https://github.com/huggingface/diffusers/blob/main/LICENSE)
 
-- [NSIS]()   License: [Link to License for Library 2]
+- [requests](https://pypi.org/project/requests/) License: [Apache 2.0](https://github.com/psf/requests/blob/main/LICENSE)
 
-This project uses the following Python libraries:
+- [opencv-python](https://pypi.org/project/opencv-python/) License: [Apache 2.0](https://github.com/opencv/opencv/blob/master/LICENSE)
 
-- [opencv-python](https://pypi.org/project/opencv-python/) License: [OpenCV License](https://github.com/opencv/opencv/blob/master/LICENSE)
-
-- [torch](https://pypi.org/project/torch/) License: [PyTorch License](https://github.com/pytorch/pytorch/blob/master/LICENSE)
-
-- [numpy](https://pypi.org/project/numpy/) License: [NumPy License](https://numpy.org/doc/stable/license.html)
+- [torch](https://pypi.org/project/torch/) License: [Modified BSD](https://github.com/pytorch/pytorch/blob/master/LICENSE)
 
 - [tqdm](https://pypi.org/project/tqdm/) License: [MIT License](https://github.com/tqdm/tqdm/blob/main/LICENCE)
 
-- [matplotlib](https://pypi.org/project/matplotlib/) License: [Matplotlib License](https://github.com/matplotlib/matplotlib/blob/main/LICENSE/LICENSE)
+- [numpy](https://pypi.org/project/numpy/) License: [Modified BSD](https://numpy.org/doc/stable/license.html)
 
-- [Pillow](https://pypi.org/project/Pillow/) License: [PIL License](https://pillow.readthedocs.io/en/stable/releasenotes/8.2.0.html#licensing)
+- [matplotlib](https://pypi.org/project/matplotlib/) License: [PSF](https://github.com/matplotlib/matplotlib/blob/main/LICENSE/LICENSE)
 
-- [diffusers](https://pypi.org/project/diffusers/) License: [Specify the license if available]
+- [Pillow](https://pypi.org/project/Pillow/) License: [HPND](https://github.com/python-pillow/Pillow/blob/main/LICENSE)
 
-- [PyQt6](https://pypi.org/project/PyQt6/) License: [Riverbank Commercial License](https://www.riverbankcomputing.com/static/Docs/PyQt6/licensing.html)
-
-- [requests](https://pypi.org/project/requests/) License: [Apache License 2.0](https://github.com/psf/requests/blob/main/LICENSE)
 
 ## Contributions
 Contributions to this codebase are welcome! If you encounter any issues, bugs or have suggestions for improvements please open an issue or a pull request on the [GitHub repository](https://github.com/Adillwma/BackupInspector).
