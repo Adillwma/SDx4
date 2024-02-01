@@ -40,10 +40,10 @@ SDx4 Image Upscaler is a user-friendly native Windows program that leverages the
 - Local processing, no internet connection required, none of your data is sent to any third party.
 - Customisable themes using the comprehensive integrated live theme designer.
 
-# Behind the scenes goodies (The sauce that makes the magic wheel spin)
+# Behind the scenes (The sauce that makes the magic wheel spin)
 - Incorperates fixed tile processing to allow for large images to be upscaled with low ram usage whilst opperating the upscale model at its optimum input resoloution (if set to 512). (Tile size selectable from 128, 256 or 512)
 - Dynamic tileshifting to reduce image edge artifacts, and allow for a more accurate upscale whilst avoiding dark pixel padding or processing non image data.
-- Edge blending methods selectable by user to reduce tile seams.
+- Edge blending methods selectable by user to reduce tile seams.  [COMING SOON]
 - Haar Cascade face detection to allow for automatic increased processing quality on tiles containing faces.
 - Live preview of the image upscale during processing, each tile is updated in the preview every other iteration.
 - Ability to use the xFormers library to greatly speed up processing given a cuda gpu.            
@@ -149,7 +149,7 @@ For more settings you can click the 'Advanced Mode' button to open the full upsc
 
 ### Program Settings:
 
-To access the main program settings window, click the settings cog located at the bottom left of the UI. 
+To access the main program settings window, click the settings cog located at the bottom left of the UI.
 
 <div align="center">
 
@@ -188,6 +188,8 @@ This will open the settings window where you can configure the following setting
 
 
 
+
+
 ## Methods
 
 ### Tiled Processing
@@ -197,11 +199,13 @@ We use a fixed tile size which is user selectable between 128, 256, 512 and 1024
 
 (NOTE: For input images that are smaller than the selected tile size the processor will abandon a tiled approach and process the image as a whole in one pass.)
 
-Fixed size tiled processing neccesitates padding edges of any input images that have dimensions not divisible by the tile size. This amounts to adding a bunch of new 0 value pixels that need to be processed yet have no use. Additonally this method introduces image artifacts in those tiles at the edges that have padding in them, as can be seen in the following examples:
+Fixed size tiled processing neccesitates padding edges of any input images that have dimensions not divisible by the tile size. This amounts to adding a bunch of new 0 value pixels that need to be processed yet have no use. Additonally this method can introduce strange image artifacts in those tiles at the edges that have padding in them, due to the kernel taking into account the black padding, as can be seen in the following example:
 
 <div align="center">
 
-<img src="Images/" width="800"> 
+<img src="Images/padded_edge_distortion.png" width="800"> 
+
+The same tile shown using a black padding (left) and a my dynamic shift (right). 
 
 </div>
 
@@ -213,7 +217,11 @@ Every tile therfore is filled with image data, solving the distortion due to til
 This does mean we are processing pixels of the image multiple times for no reason but it is favorable to it being padding which distorts the output and there si no way to scape it and retain the fixed window size for the model.
 
 ### Feathered Patching [FEATURE COMING IN NEXT RELEASE]
-In addition to the standard hard edge blanding various soft edge feathering blend modes for recombining the tiles are available to the user. These are:
+Currenlty the implementation of tiles processing can cause visible seams between tiles, as shown in the following example: 
+
+
+To overcome this I have begun implementing a method of feathered patching where the tiles are blended together at the edges to reduce the visibility of the seams which will be a part of the next update. This is done by blending the edges of the tiles with the edges of the adjacent tiles. The blending is done using a user selectable blending mode,
+
 -Additive
 -Subtractive
 -Multiply
@@ -226,11 +234,12 @@ In addition to the standard hard edge blanding various soft edge feathering blen
 -Pin Light
 
 These allow the tiles to be blended together in a more natural way, and can be used to reduce the edge artifacts that can be seen in the standard hard edge blending method.
-You can preview and adjust the blending live once upscaling has finished to perfect your image.
+
+The aim is to be able to preview and adjust the blending live once upscaling has finished to perfect your image, although this may be further down the line with the setting having to be set before processing for now.
 
 <div align="center">
 
-<img src="Images/" width="800"> 
+<img src="Images/tile_blending.png" width="400"> 
 </div>
 
 ### Boosted Face Quality
@@ -239,7 +248,7 @@ Uses Haar Cascade face detection to check if faces are present in the image. Thi
 
 <div align="center">
 
-<img src="Images/Haar_Cascade.jpeg" width="800"> 
+<img src="Images/Haar_Cascade.jpeg" width="700"> 
 
 In this example we can see that in all the images where the algorythm has failed to detect the face (other than the one where half the face is covered by the hand) the face is angled. In all the sucsessfull identifications the face is pretty straight on, this seems to be a limitation of the Haar Cascade model.  
 Modified from Original Photo By: Andrea Piacquadio, from Pexels: https://www.pexels.com/photo/collage-photo-of-woman-3812743/
@@ -253,7 +262,7 @@ Haar cascades, introduced by Viola and Jones in 2001 paper "Rapid Object Detecti
 
 <div align="center">
 
-<img src="Images/themedesigner.png" width="800"> 
+<img src="Images/themedesigner.png" width="1200"> 
 
 The integrated 'Theme Designer' dialog UI. 
 
@@ -316,7 +325,7 @@ Contributions to this codebase are welcome! If you encounter any issues, bugs or
 For any further inquiries or for assistance in running the simulation, please feel free to reach out to me at adill@neuralworkx.com.
 
 ## Donations
-If you find this project useful, or implement it in your own work, please consider donating a coffee which is the liquid that fuels this project and more!
+If you find this project useful, or implement it in your own work, please consider donating a coffee, the liquid that fuels this project and more!
 
 <div align="center">
 
