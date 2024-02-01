@@ -11,7 +11,7 @@
     - Advanced blended tiled processing for upscaling large images with low memory usage.
 
 [![Github Repo](https://img.shields.io/badge/GitHub_Repo-SDx4_ImageUpscaler-yellow.svg)](https://github.com/Adillwma/SDx4_ImageUpscaler)
-[![License](https://img.shields.io/badge/license-GPLv3-red.svg)](https://github.com/Adillwma/SDx4_ImageUpscaler/blob/main/LICENSE)
+[![License](https://img.shields.io/badge/license-GPLv3-green.svg)](https://github.com/Adillwma/SDx4_ImageUpscaler/blob/main/LICENSE)
 [![Language](https://img.shields.io/badge/language-Python-blue.svg)](https://www.python.org/)
 
 </div>
@@ -20,21 +20,23 @@
 SDx4 Image Upscaler is a user-friendly native Windows program that leverages the power of the [Stable Diffusion x4 Upscaler](https://huggingface.co/stabilityai/stable-diffusion-x4-upscaler) model developed by [Stability AI](https://stability.ai/). This package is designed to provide a seamless, lightweight, and secure way to upscale your images with cutting edge neural upscaling. The package is bundled as a Windows installer, eliminating the need for Python or any additional code dependencies and includes smart tiled processing to massivly reduce the RAM/VRAM requirments for processing large images. Happy enhancing!
 
 ## Table of Contents
-- [Features](#features)
+- [Features](#main-features)
 - [Installation](#installation)
-   - [Windows](#windows)
+   - [Windows](#windows-10)
    - [Other Operating Systems](#other-operating-systems)
 - [Usage](#usage)
 - [Known Issues](#known-issues)
 - [Methods](#methods)
    - [Tiled Processing](#tiled-processing)
    - [Dynamic Tileshifting](#dynamic-tileshifting)
-   - [Feathered Patching](#feathered-patching)
-- [Contributions](#contributions)
+   - [Feathered Patching](#feathered-patching-feature-coming-in-next-release)
 - [License](#license)
+- [Contributions](#contributions)
 - [Contact](#contact)
+- [Donations](#donations)
 
-# Main Features
+
+## Main Features
 - Packaged as a windows program with no dependencies or need to see code.
 - Lightweight modern GUI. 
 - Batch processing upscaling ability.
@@ -42,7 +44,7 @@ SDx4 Image Upscaler is a user-friendly native Windows program that leverages the
 - Local processing, no internet connection required, none of your data is sent to any third party.
 - Customisable themes using the comprehensive integrated live theme designer.
 
-# Behind the scenes (The sauce that makes the magic wheel spin)
+### Behind the scenes (The sauce that makes the magic wheel spin)
 - Incorperates fixed tile processing to allow for large images to be upscaled with low ram usage whilst opperating the upscale model at its optimum input resoloution (if set to 512). (Tile size selectable from 128, 256 or 512)
 - Dynamic tileshifting to reduce image edge artifacts, and allow for a more accurate upscale whilst avoiding dark pixel padding or processing non image data.
 - Edge blending methods selectable by user to reduce tile seams.  [COMING SOON]
@@ -65,7 +67,7 @@ To install SDx4 for Windows, follow these steps:
 
 4. Enjoy your upscaled images! (For tips or help using the program see the [Usage](#usage) section below)
 
-### Linux / MacOS / Other Operating Systems
+### Other Operating Systems
 SDx4 is primarily developed for Windows. However, it can also be run on other operating systems by executing the Python code directly. 
 To run SDx4 Image Upscaler on other operating systems, follow these steps:
 
@@ -286,9 +288,7 @@ Clicking the 'Randomise All Unlocked' button will randomise all the unlocked the
 Before you click the button make sure to enter a unique name for your theme in the box. Clicking the 'Save Theme' button will let you save your theme. Once saved, the theme then will be availible to select in the main program theme selection dropdown alongside with the built in themes.
 
 ## License
-This project is released under the GPL v3 license. For more information, please refer to the LICENSE file.
-
-This project also uses the following third-party libraries, please refer to the individual liscences for more information:
+This project is released under the GPL v3 license, [LICENSE](https://github.com/Adillwma/SDx4_ImageUpscaler/blob/main/LICENSE). This project also uses the following third-party libraries, please refer to the individual liscences for more information:
 
 - [Stability AI Stable Diffusion x4 Upscaler](https://huggingface.co/stabilityai/stable-diffusion-x4-upscaler) License: [CreativeML Open RAIL++-M License](https://huggingface.co/stabilityai/stable-diffusion-2/blob/main/LICENSE-MODEL)
 
