@@ -10,8 +10,10 @@
     - No internet connection required, local processing, no data sent to any third party.
     - Advanced blended tiled processing for upscaling large images with low memory usage.
 
-[![Github Repo](https://img.shields.io/badge/GitHub_Repo-SDx4_ImageUpscaler-yellow.svg)](https://github.com/Adillwma/Windows_SDx4_ImageUpscaler)
+[![Github Repo](https://img.shields.io/badge/GitHub_Repo-SDx4_ImageUpscaler-yellow.svg)](https://github.com/Adillwma/SDx4_ImageUpscaler)
+[![License](https://img.shields.io/badge/license-GPLv3-red.svg)](https://github.com/Adillwma/SDx4_ImageUpscaler/blob/main/LICENSE)
 [![Language](https://img.shields.io/badge/language-Python-blue.svg)](https://www.python.org/)
+
 </div>
 
 ## Introduction
@@ -312,7 +314,7 @@ This project also uses the following third-party libraries, please refer to the 
 
 
 ## Contributions
-Contributions to this codebase are welcome! If you encounter any issues, bugs or have suggestions for improvements please open an issue or a pull request on the [GitHub repository](https://github.com/Adillwma/BackupInspector).
+Contributions to this codebase are welcome! If you encounter any issues, bugs or have suggestions for improvements please open an issue or a pull request on the [GitHub repository](https://github.com/Adillwma/SDx4_ImageUpscaler).
 
 ## Contact
 For any further inquiries or for assistance in running the simulation, please feel free to reach out to me at adill@neuralworkx.com.
