@@ -13,7 +13,6 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from PyQt6.QtCore import QPropertyAnimation, QEasingCurve, QThread, pyqtSignal, Qt
 from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog, QVBoxLayout, QColorDialog, QDialog
 
-
 ## - As building a exe file with no console, transformers library will suffer from an error where sys.stdout and sys.stderr are None
 # Below four lines fix this issue by redirecting stdout and stderr to os.devnull as suggested here: https://github.com/huggingface/transformers/issues/24047#issuecomment-1635532509
 if sys.stdout is None:
@@ -107,56 +106,21 @@ class FileProcessingThread(QThread):
     finished = pyqtSignal()
     stopped = pyqtSignal()
 
-    def __init__(self, processing_file_list, output_dir, patch_size, padding_size, num_inference_steps, guidance_scale, prompt, negative_prompt, boost_face_quality, blending, blend_mode, callback_steps, show_patches, dummy_upscale, xformers, cpu_offload, attention_slicing, seed, safety_checker):
+    def __init__(self):
         super().__init__()
-        self.local_image_paths = [file_info["input_file_path"] for file_info in processing_file_list]
-        self.number_of_images = len(self.local_image_paths)
-        self.output_dir = output_dir
-        self.patch_size = patch_size
-        self.padding_size = padding_size
-        self.num_inference_steps = num_inference_steps
-        self.guidance_scale = guidance_scale
-        self.prompt = prompt
-        self.negative_prompt = negative_prompt
-        self.blending = blending
-        self.blend_mode = blend_mode
-        self.callback_steps = callback_steps
-        self.show_patches = show_patches
-        self.dummy_upscale = dummy_upscale
-        self.xformers = xformers
-        self.cpu_offload = cpu_offload
-        self.attention_slicing = attention_slicing
-        self.seed = seed
-        self.boost_face_quality = boost_face_quality
-        self.safety_checker = safety_checker
-        self.upscale = SDx4Upscaler(self.xformers, self.cpu_offload, self.attention_slicing, self.seed, self.safety_checker)
-        self.upscale.callback_signal.connect(self.send_patch_preview)
-        self.upscale.tile_complete_signal.connect(self.send_tile_complete)
-        self.upscale.processing_position_signal.connect(self.send_progress_update)
-        os.makedirs(self.output_dir, exist_ok=True)
 
     def send_patch_preview(self, img_patch, patch_num):
         self.patch_preview.emit(img_patch, patch_num, self.current_image_num)
-        #print("patch preview sent from processing thread")
 
     def send_tile_complete(self, tile_complete_image, tile_num):
         self.tile_complete_signal.emit(tile_complete_image, tile_num, self.current_image_num)
-        #print("tile complete sent from processing thread")
 
     def send_progress_update(self, current_tile, total_tiles, current_iteration, total_iterations):
         self.processing_position_signal.emit(self.current_image, self.number_of_images, current_tile, total_tiles, current_iteration, total_iterations)
-        #print("progress update sent from processing thread")
-
-
-    def process_image(self, local_image_path):
-        pass
-
-
 
     def run(self):
         for current_image_num, local_image_path in enumerate(self.local_image_paths):
-            # Check for interruption requests
-            if self.isInterruptionRequested():    # need better method that can exit anytime during processing not just between files
+            if self.isInterruptionRequested():   # Check for interruption requests   # need better method that can exit anytime during processing not just between files
                 self.stopped.emit()
                 return
 
@@ -164,7 +128,18 @@ class FileProcessingThread(QThread):
             self.current_image = current_image_num + 1
 
             ### missing params i.e blend mode!!!
-            upscaled_image = self.upscale.upscale(local_image_path, self.patch_size, self.padding_size, self.num_inference_steps, self.guidance_scale, self.prompt, self.negative_prompt, self.boost_face_quality, self.blending, self.callback_steps, self.show_patches, self.dummy_upscale)
+            upscaled_image = self.upscaler.upscale(local_image_path, 
+                                                  self.patch_size, 
+                                                  self.padding_size, 
+                                                  self.num_inference_steps, 
+                                                  self.guidance_scale, 
+                                                  self.prompt, 
+                                                  self.negative_prompt, 
+                                                  self.boost_face_quality, 
+                                                  self.blending, 
+                                                  self.callback_steps, 
+                                                  self.show_patches, 
+                                                  self.dummy_upscale)
             
             # get input image name
             image_name = os.path.basename(local_image_path)
@@ -175,14 +150,36 @@ class FileProcessingThread(QThread):
             low_res_img.save(os.path.join(self.output_dir, image_name + "_Original.png"))
             upscaled_image.save(os.path.join(self.output_dir, image_name + "_Upscaled.png"))
 
-
         # CLENA UP IMAGES FROM THE TEMP FOLDER HERE TOO OR COPULD KEEP THEM FOR A COMPARISON VIEWER PAGE OR SOMTHING?????
             
-
-
-
         # Emit the finished signal when processing is done
         self.finished.emit()
+
+    
+    def initialize_upscale_job(self, processing_file_list, output_dir, patch_size, padding_size, num_inference_steps, guidance_scale, prompt, negative_prompt, boost_face_quality, blending, blend_mode, callback_steps, show_patches, dummy_upscale, xformers, cpu_offload, attention_slicing, seed, safety_checker):
+
+        self.local_image_paths = [file_info["input_file_path"] for file_info in processing_file_list]
+        self.number_of_images = len(self.local_image_paths)
+
+        self.upscaler = SDx4Upscaler(xformers, cpu_offload, attention_slicing, seed, safety_checker)
+        self.upscaler.callback_signal.connect(self.send_patch_preview)
+        self.upscaler.tile_complete_signal.connect(self.send_tile_complete)
+        self.upscaler.processing_position_signal.connect(self.send_progress_update)
+        os.makedirs(output_dir, exist_ok=True)
+
+        self.output_dir = output_dir
+        self.patch_size = patch_size
+        self.padding_size = padding_size
+        self.num_inference_steps = num_inference_steps
+        self.guidance_scale = guidance_scale
+        self.prompt = prompt
+        self.negative_prompt = negative_prompt
+        self.boost_face_quality = boost_face_quality
+        self.blending = blending
+        self.callback_steps = callback_steps
+        self.show_patches = show_patches
+        self.dummy_upscale = dummy_upscale
+
 
 # Upscale preview thread
 class UpscalePreviewThread(QThread):
@@ -774,7 +771,30 @@ class MainWindow(QMainWindow):
         # Begin program threads
         self.file_handling_thread = FileHandlingThread(self.temp_folder)
         self.is_upscale_running = False
+
+
+        # Initialise Backend
+        self.file_processing_thread = FileProcessingThread()
+
+        # Connect signals from the file processing thread to gui
+        self.file_processing_thread.finished.connect(self.file_processing_finished)
+        self.file_processing_thread.stopped.connect(self.file_processing_stopped)
+        self.file_processing_thread.processing_position_signal.connect(self.update_progress_bars)
+
+        # Initialise the upscale preview thread
+        self.upscale_preview_thread = UpscalePreviewThread(self.file_handling_thread)
+        self.upscale_preview_thread.preview_update_signal.connect(self.refresh_plot_data)
+        
+        self.file_processing_thread.patch_preview.connect(self.upscale_preview_thread.update_preview_tile)
+        self.file_processing_thread.tile_complete_signal.connect(self.upscale_preview_thread.update_preview_tile)
+
         #self.file_handling_thread.start()
+
+        self.upscale_preview_thread.start()
+
+
+
+
 
     #%% - Initialise UI
     def check_preferences(self):                                                            # Checks the user preferences file to load the correct settings
@@ -1057,7 +1077,6 @@ class MainWindow(QMainWindow):
         self.exit_dialog = ExitDialog(self)
         self.exit_dialog.exec()
 
-
     def switch_ui_mode(self):
         if self.current_ui_mode == "light":
             self.current_ui_mode = "dark"
@@ -1157,8 +1176,6 @@ class MainWindow(QMainWindow):
                 togglable_icon.addPixmap(pixmaps[1], QIcon.Mode.Normal, QIcon.State.On)
                 button.setIcon(togglable_icon)
 
-
-
     def open_theme_designer_dialog(self):
         Dialog = ThemeDesigner(self.current_theme, self.current_ui_mode, self.avalible_themes)
         Dialog.update_ui_preview_signal.connect(self.preview_from_theme_creator)
@@ -1254,7 +1271,6 @@ class MainWindow(QMainWindow):
         self.output_dir = QFileDialog.getExistingDirectory(self, "Select Output Directory", self.output_dir)
         self.ui.outputLocationTextDisplay.setText(self.output_dir)
 
-
     def browse_input_files(self):
         file_paths, _ = QFileDialog.getOpenFileNames(self, "Select Input Files", "", "Image Files (*.png *.jpg *.jpeg *.bmp *.gif)")
         if file_paths:              # if user selects a path wothout canceling the dialog box
@@ -1287,7 +1303,6 @@ class MainWindow(QMainWindow):
             self.ui.inputresDisplayLabel.setText(f"{input_res[0]} x {input_res[1]}")
             self.ui.outputresDisplayLabel.setText(f"{output_res[0]} x {output_res[1]}")
 
-
     def update_plot_data(self, image_path):
         if image_path == None:                                  # show no plot 
             self.user_text_warning.set_text('Please select an image')              
@@ -1300,11 +1315,9 @@ class MainWindow(QMainWindow):
         
         self.canvas.draw()                 # Refresh the canvas 
 
-
     def refresh_plot_data(self, preview_image):
         self.gui_image_display_ax.set_data(preview_image)
         self.canvas.draw()                 # Refresh the canvas    
-
 
     def upscale_btn_clicked(self):
         if self.is_upscale_running == False:
@@ -1321,9 +1334,6 @@ class MainWindow(QMainWindow):
             print("Upscale cancelled")
         else:
             pass
-
-    
-
 
     def cancel_upscale(self):
         # Request interruption to stop the file processing thread
@@ -1377,10 +1387,9 @@ class MainWindow(QMainWindow):
             json.dump(self.config_data, file, indent=4)
 
     #%% - Backend Thread Functions
-    def start_file_processing_thread(self):
+    def start_file_processing_thread(self):   # change func name to reflect that now itr just runs an upscale ratehr than starting the thread
         
-        # Initialise Backend
-        self.file_processing_thread = FileProcessingThread( self.file_handling_thread.processing_file_list,              # specify list of input images
+        self.file_processing_thread.initialize_upscale_job( self.file_handling_thread.processing_file_list,              # specify list of input images
                                                             self.output_dir,           # specify output directory
                                                             self.patch_size,         
                                                             self.padding_size,               
@@ -1400,24 +1409,10 @@ class MainWindow(QMainWindow):
                                                             self.seed,                            # If None, will use a random seed. If set to a numerical value, will use value as the generator seed.
                                                             self.safety_checker)
 
-        # Connect signals from the file processing thread to gui
-        self.file_processing_thread.finished.connect(self.file_processing_finished)
-        self.file_processing_thread.stopped.connect(self.file_processing_stopped)
-        self.file_processing_thread.processing_position_signal.connect(self.update_progress_bars)
-
-        # Initialise the upscale preview thread
-        self.upscale_preview_thread = UpscalePreviewThread(self.file_handling_thread)
-        self.upscale_preview_thread.preview_update_signal.connect(self.refresh_plot_data)
-        
-        self.file_processing_thread.patch_preview.connect(self.upscale_preview_thread.update_preview_tile)
-        self.file_processing_thread.tile_complete_signal.connect(self.upscale_preview_thread.update_preview_tile)
-
-
-
-        self.upscale_preview_thread.start()
-
-        # Start the file processing thread
+        # Start the file processing thread run method
         self.file_processing_thread.start()
+
+
 
     def cancel_file_processing(self):
         # Request interruption to stop the file processing thread

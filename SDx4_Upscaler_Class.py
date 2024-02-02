@@ -9,10 +9,9 @@ from PyQt6.QtCore import pyqtSignal, QObject
 from PIL import Image, ImageChops, ImageEnhance
 from diffusers import StableDiffusionUpscalePipeline
 
-### beacuse we are checking if file is greater than patch without padding when a file is exactly of windows size and there is only one pathc then we end up genrating four for no reason
 ### callback images washed out/odd?
 ### fix all blending modes. currently only normal works
-### clean up face detection code
+
 
 class SDx4Upscaler(QObject):
     """
@@ -63,7 +62,7 @@ class SDx4Upscaler(QObject):
         logging will go to console if log_to_file is False, otherwise it will go to a file called SDx4Upscaler.log
         """
         super().__init__()  # Call the __init__ method of the parent class
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")    # cpu, cuda, ipu, xpu, mkldnn, opengl, opencl, ideep, hip, ve, fpga, ort, xla, lazy, vulkan, mps, meta, hpu, mtia, privateuseone
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.pipeline = StableDiffusionUpscalePipeline.from_pretrained("stabilityai/stable-diffusion-x4-upscaler", torch_dtype=torch.float32, safety_checker=safety_checker)   #, local_files_only=True
 
         #self.pipeline = StableDiffusionUpscalePipeline.from_pretrained(r"A:\Users\Ada\GitHub\AI_Image_Upscale_Windows\App_Data\models--stabilityai--stable-diffusion-x4-upscaler\snapshots\572c99286543a273bfd17fac263db5a77be12c4c", generator=self.generator, torch_dtype=torch.float32, safety_checker=safety_checker)   #, local_files_only=True
@@ -463,7 +462,7 @@ if __name__ == "__main__":
     local_image_paths = [r"A:\Users\Ada\Desktop\funkyspace.png"] # replace with your actual image path
     prompt = ""
     negative_prompt = ""
-    num_inference_steps = 3   # Must be > 3 for any usable output, > 5 for okay output, > 10 for good output, 50+ for great output
+    num_inference_steps = 3   # Short for very quick test, should be 15+ for good reproduction 
     guidance_scale = 0.5
     patch_size = 120
     padding_size = 8

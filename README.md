@@ -7,8 +7,8 @@
 <img src="Images/SDX4_BANNER.png" width="800"> 
 
     - 4x resoloution neural image upscaling
-    - No internet connection required, local processing, no data sent to any third party.
     - Advanced blended tiled processing for upscaling large images with low memory usage.
+    - Local processing, no internet connection required, no data sent to any third party.
 
 [![Github Repo](https://img.shields.io/badge/GitHub_Repo-SDx4_ImageUpscaler-yellow.svg)](https://github.com/Adillwma/SDx4_ImageUpscaler)
 [![License](https://img.shields.io/badge/license-GPLv3-green.svg)](https://github.com/Adillwma/SDx4_ImageUpscaler/blob/main/LICENSE)
@@ -25,11 +25,14 @@ SDx4 Image Upscaler is a user-friendly native Windows program that leverages the
    - [Windows](#windows-10)
    - [Other Operating Systems](#other-operating-systems)
 - [Usage](#usage)
-- [Known Issues](#known-issues)
+   - [Quick Start Guide](#quick-start-guide)
+   - [Advanced Upscale Settings](#advanced-upscale-settings)
+   - [Program Settings](#program-settings)
 - [Methods](#methods)
    - [Tiled Processing](#tiled-processing)
    - [Dynamic Tileshifting](#dynamic-tileshifting)
    - [Feathered Patching](#feathered-patching-feature-coming-in-next-release)
+- [Known Issues](#known-issues)
 - [License](#license)
 - [Contributions](#contributions)
 - [Contact](#contact)
@@ -105,6 +108,8 @@ from SDx4UpscalerClass import SDx4UpscalerClass
 More information on the headless class can be found in PyPi page [SDx4UpscalerClass on Pypi](   )  or standalone github repo [SDx4UpscalarClass on Github]().
 
 ## Usage
+
+### Quick Start Guide:
 To run SDx4 Image Upscaler, follow these steps:
 
 1. Add the image(s) you wish to upscale by clicking the 'Add Images' button or add all the images in a folder at once by clicking the 'Add folder' button.
@@ -168,31 +173,6 @@ This will open the settings window where you can configure the following setting
 - Open the integrated Theme Designer to create your own custom theme with live preview on the UI.
 
 - Check for porgram updates, and download and install them if availible.
-
-## Known Issues
-
-- GUI becomes non responsive while downloading the model from the huggingface server on first run. 
-
-   Issue Tracking Link: [Issue #1](https://github.com/Adillwma/AI_Image_Upscale_Windows_GUI/issues/1)
-
-- Program will use tiling even if image is smaller than a single tile. 
-
-   Issue Tracking Link: [Issue #2](https://github.com/Adillwma/AI_Image_Upscale_Windows_GUI/issues/2)   
-
-- Users can still navigate program when images are upscaling. 
-
-   Issue Tracking Link: [Issue #3](https://github.com/Adillwma/AI_Image_Upscale_Windows_GUI/issues/3) 
-
-- Upscale preview stays on first image if upscaling a number of images at once. 
-
-   Issue Tracking Link: [Issue #4](https://github.com/Adillwma/AI_Image_Upscale_Windows_GUI/issues/4) 
-
-
-
-
-
-
-
 
 ## Methods
 
@@ -286,6 +266,32 @@ Clicking the 'Randomise All Unlocked' button will randomise all the unlocked the
 
 #### Save Theme
 Before you click the button make sure to enter a unique name for your theme in the box. Clicking the 'Save Theme' button will let you save your theme. Once saved, the theme then will be availible to select in the main program theme selection dropdown alongside with the built in themes.
+
+## Known Issues
+
+- GUI becomes non responsive while downloading the model from the huggingface server on first run. 
+
+   Issue Tracking Link: [Issue #1](https://github.com/Adillwma/AI_Image_Upscale_Windows_GUI/issues/1)
+
+- Program will use tiling even if image is smaller than a single tile. 
+
+   Issue Tracking Link: [Issue #2](https://github.com/Adillwma/AI_Image_Upscale_Windows_GUI/issues/2)   
+
+- Users can still navigate program when images are upscaling. 
+
+   Issue Tracking Link: [Issue #3](https://github.com/Adillwma/AI_Image_Upscale_Windows_GUI/issues/3) 
+
+- Upscale preview stays on first image if upscaling a number of images at once. 
+
+   Issue Tracking Link: [Issue #4](https://github.com/Adillwma/AI_Image_Upscale_Windows_GUI/issues/4) 
+
+- Model download repeatedly required, include download in installer rather than at runtime.
+
+   Issue Tracking Link: [Issue #5](https://github.com/Adillwma/AI_Image_Upscale_Windows_GUI/issues/5) 
+
+- Add button hover effects to all buttons, so user is aware that program is still responsive.
+   Issue Tracking Link: [Issue #6](https://github.com/Adillwma/AI_Image_Upscale_Windows_GUI/issues/6) 
+
 
 ## License
 This project is released under the GPL v3 license, [LICENSE](https://github.com/Adillwma/SDx4_ImageUpscaler/blob/main/LICENSE). This project also uses the following third-party libraries, please refer to the individual liscences for more information:
