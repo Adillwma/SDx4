@@ -76,6 +76,7 @@ class SDx4Upscaler(QObject):
         if attention_slicing and self.device == "cuda" and not xformers:
             self.pipeline.enable_attention_slicing()
 
+        self.interupt_requested = False
         self.use_tqdm = False  # change back to true if used as a standalone class?!!!!
         self.initialise_logging(log_level, log_to_file, xformers, cpu_offload, attention_slicing)
 
@@ -153,6 +154,8 @@ class SDx4Upscaler(QObject):
         self.filepath = local_image_path
         low_res_img = Image.open(local_image_path).convert("RGB")
 
+        self.num_inference_steps_used = num_inference_steps
+
         # add face check here 
         if boost_face_quality:
             # check image for faces
@@ -163,17 +166,10 @@ class SDx4Upscaler(QObject):
                 self.num_inference_steps_used = num_inference_steps * self.face_modifier
                 self.logger.info(f"increasing num_inference_steps to: {num_inference_steps}")
             
-            else:
-                self.num_inference_steps_used = num_inference_steps
-                self.logger.info(f"no faces detected, using num_inference_steps: {num_inference_steps}")
-
         else:
             check_for_face_result = False
             faces = []
             facedetection_boundingboxes_debugimage = None
-            self.num_inference_steps_used = num_inference_steps
-
-
 
 
         if low_res_img.size[0] <= (patch_size + padding_size) and low_res_img.size[1] <= (patch_size + padding_size):   # check if image is smaller than window size in whcxh case just upscale it
@@ -432,9 +428,13 @@ class SDx4Upscaler(QObject):
 
         plt.show()
 
+
     def callback(self, iter, t, latents):
 
         self.processing_position_signal.emit(self.patch_num, self.number_of_patches, iter, self.num_inference_steps_used)
+        #if self.interupt_requested:
+        #    self.logger.warning("Interuption requested")
+        #    self.pipeline._interrupt = True
 
         if iter % self.callback_steps == 0:
             # convert latents to image
@@ -454,6 +454,7 @@ class SDx4Upscaler(QObject):
 
                     # report that a new image is ready as a signal so outside class can execute an event 
                     self.callback_signal.emit(img, self.patch_num)
+
 
 # Demo usage of the SDx4Upscaler class
 if __name__ == "__main__":

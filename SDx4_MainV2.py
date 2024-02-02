@@ -11,7 +11,33 @@ from PIL import Image, ImageDraw, ImageFont
 from PyQt6.QtGui import QIcon, QPixmap, QPainter, QColor
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from PyQt6.QtCore import QPropertyAnimation, QEasingCurve, QThread, pyqtSignal, Qt
-from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog, QVBoxLayout, QColorDialog, QDialog
+from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog, QVBoxLayout, QColorDialog, QDialog, QLabel
+from PyQt6.QtGui import QPixmap
+from PIL.ImageQt import ImageQt
+
+class ImageWidget(QLabel):
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setScaledContents(True)
+
+    def hasHeightForWidth(self):
+        return self.pixmap() is not None
+
+    def heightForWidth(self, width):
+        if self.pixmap():
+            return int(width * (self.pixmap().height() / self.pixmap().width()))
+
+    def sizeHint(self):
+        return self.minimumSizeHint()
+
+    def minimumSizeHint(self):
+        if self.pixmap():
+            return self.pixmap().size()
+        return super().minimumSizeHint()
+        
+
+
 
 ## - As building a exe file with no console, transformers library will suffer from an error where sys.stdout and sys.stderr are None
 # Below four lines fix this issue by redirecting stdout and stderr to os.devnull as suggested here: https://github.com/huggingface/transformers/issues/24047#issuecomment-1635532509
@@ -68,7 +94,8 @@ class FileHandlingThread(QThread):
 
         # Create preview image
         preview_image = image.copy()
-        preview_image = preview_image.resize((image.width * 4, image.height * 4), Image.NEAREST)     
+        preview_image = preview_image.resize((image.width * 4, image.height * 4), Image.NEAREST)   
+        preview_image = preview_image.convert("RGBA") # convert to RGBA so that the image is loadable into the Qimage and can be displayed in the GUI  
 
         # Detemine image resoloutions
         input_res = (image.width, image.height)                              # determine the input resoloution
@@ -120,10 +147,6 @@ class FileProcessingThread(QThread):
 
     def run(self):
         for current_image_num, local_image_path in enumerate(self.local_image_paths):
-            if self.isInterruptionRequested():   # Check for interruption requests   # need better method that can exit anytime during processing not just between files
-                self.stopped.emit()
-                return
-
             self.current_image_num = current_image_num
             self.current_image = current_image_num + 1
 
@@ -179,7 +202,6 @@ class FileProcessingThread(QThread):
         self.callback_steps = callback_steps
         self.show_patches = show_patches
         self.dummy_upscale = dummy_upscale
-
 
 # Upscale preview thread
 class UpscalePreviewThread(QThread):
@@ -302,7 +324,6 @@ Form, Window = uic.loadUiType("GUI\SDx4_interface.ui")
 app = QApplication([])
 
 from GUI.clickablewidget import ClickableWidget
-
 
 class ThemeDesigner(QDialog):
     update_ui_preview_signal = pyqtSignal(dict)
@@ -772,7 +793,6 @@ class MainWindow(QMainWindow):
         self.file_handling_thread = FileHandlingThread(self.temp_folder)
         self.is_upscale_running = False
 
-
         # Initialise Backend
         self.file_processing_thread = FileProcessingThread()
 
@@ -789,10 +809,7 @@ class MainWindow(QMainWindow):
         self.file_processing_thread.tile_complete_signal.connect(self.upscale_preview_thread.update_preview_tile)
 
         #self.file_handling_thread.start()
-
         self.upscale_preview_thread.start()
-
-
 
 
 
@@ -909,15 +926,16 @@ class MainWindow(QMainWindow):
 
         # Add the canvas to the layout
         layout.addWidget(self.canvas)
-
         self.user_text_warning = self.ax.text(0.5, 0.5, 'Please select an image', horizontalalignment='center', verticalalignment='center', transform=self.ax.transAxes, fontsize=20)              # add text on the plot to tell the user to select an image
-
-        self.empty_im = np.zeros((1, 1, 4), dtype=np.uint8)  # create an empty image to display when no image is selected
-        self.gui_image_display_ax = self.ax.imshow(self.empty_im)
-        self.figure.tight_layout()
         self.ax.axis('off')                                 # turn off axis
         self.figure.patch.set_alpha(0)                      # set mpl background alpha to 0 to make it transparent 
         self.canvas.draw()                 # Refresh the canvas 
+
+        # create a label to display the image
+        self.image_label = ImageWidget(self)
+        layout.addWidget(self.image_label)
+        self.image_label.hide()           # hide the image label element for now until an image is selected
+
 
     def init_icons(self):
         self.buttons = [self.ui.leftMenuBtn_UiBtnType,
@@ -1025,8 +1043,11 @@ class MainWindow(QMainWindow):
         # If the left menu is closed (width = 40), then it is opened
         if self.ui.leftMenuContainer.maximumWidth() == 50:
             self.run_animation(self.left_menu_animation, start=50, end=250)
-        else:
+        elif self.ui.leftMenuContainer.maximumWidth() == 250:
             self.run_animation(self.left_menu_animation, start=250, end=50)
+        else:     
+            pass    # Ignore presses whilst animation is running
+
 
     def handle_centre_menu(self, page):
         # if the button pressed is the same as the current page and the menu is open then close the center menu
@@ -1303,22 +1324,36 @@ class MainWindow(QMainWindow):
             self.ui.inputresDisplayLabel.setText(f"{input_res[0]} x {input_res[1]}")
             self.ui.outputresDisplayLabel.setText(f"{output_res[0]} x {output_res[1]}")
 
-    def update_plot_data(self, image_path):
-        if image_path == None:                                  # show no plot 
-            self.user_text_warning.set_text('Please select an image')              
-            self.gui_image_display_ax.set_data(self.empty_im)
-    
+
+    ##RENAME AND REFACTOR FOLLOWING TWO FUNCTIONS TO SIMPLIFY 
+    def update_plot_data(self, image_path):                # change name to set plot data
+        if image_path is None:
+            self.refresh_plot_data(None)  # Display an empty image or handle it based on your use case
+            self.image_label.hide()
+            self.canvas.show()
         else:
-            self.user_text_warning.set_text('')                 # remove the user text warning
-            self.image, self.preview_image = self.file_handling_thread.get_file_images(image_path)  
-            self.gui_image_display_ax.set_data(self.preview_image)
+            _, preview_image = self.file_handling_thread.get_file_images(image_path)
+            self.refresh_plot_data(preview_image)
+            self.canvas.hide()
+            self.image_label.show()
+
+    def refresh_plot_data(self, image_input):             # change name to 
+        if image_input is None:
+            # Handle the case of no image (display an empty image or handle it based on your use case)
+            image_pixmap = QPixmap()  
+            return
         
-        self.canvas.draw()                 # Refresh the canvas 
+        elif isinstance(image_input, Image.Image):  # Check if image_input is a PIL Image
+            image_pixmap = QPixmap.fromImage(ImageQt(image_input))
 
-    def refresh_plot_data(self, preview_image):
-        self.gui_image_display_ax.set_data(preview_image)
-        self.canvas.draw()                 # Refresh the canvas    
+        else:
+            raise ValueError("Invalid input type")
 
+        self.image_label.setPixmap(image_pixmap)
+
+
+   
+ 
     def upscale_btn_clicked(self):
         if self.is_upscale_running == False:
             self.run_upscale()
@@ -1337,7 +1372,7 @@ class MainWindow(QMainWindow):
 
     def cancel_upscale(self):
         # Request interruption to stop the file processing thread
-        self.file_processing_thread.requestInterruption()
+        self.file_processing_thread.upscaler.interupt_requested = True
 
         # change the upscale button text to "Run Upscale"
         self.ui.runUpscaleBtn.setText("Run Upscale")
@@ -1387,7 +1422,7 @@ class MainWindow(QMainWindow):
             json.dump(self.config_data, file, indent=4)
 
     #%% - Backend Thread Functions
-    def start_file_processing_thread(self):   # change func name to reflect that now itr just runs an upscale ratehr than starting the thread
+    def start_file_processing_thread(self):  
         
         self.file_processing_thread.initialize_upscale_job( self.file_handling_thread.processing_file_list,              # specify list of input images
                                                             self.output_dir,           # specify output directory
@@ -1416,7 +1451,7 @@ class MainWindow(QMainWindow):
 
     def cancel_file_processing(self):
         # Request interruption to stop the file processing thread
-        self.file_processing_thread.requestInterruption()
+        self.file_processing_thread.upscaler.interupt_requested = True
 
     def file_processing_finished(self):
         print("File processing finished")
