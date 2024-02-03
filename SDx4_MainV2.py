@@ -11,32 +11,40 @@ from PIL import Image, ImageDraw, ImageFont
 from PyQt6.QtGui import QIcon, QPixmap, QPainter, QColor
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from PyQt6.QtCore import QPropertyAnimation, QEasingCurve, QThread, pyqtSignal, Qt
-from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog, QVBoxLayout, QColorDialog, QDialog, QLabel
-from PyQt6.QtGui import QPixmap
+from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog, QVBoxLayout, QColorDialog, QDialog, QLabel 
+from PyQt6.QtGui import QPixmap, QResizeEvent
 from PIL.ImageQt import ImageQt
 
-class ImageWidget(QLabel):
 
+
+class ImageWidget(QLabel):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setScaledContents(True)
 
-    def hasHeightForWidth(self):
-        return self.pixmap() is not None
+    def setPixmap(self, pixmap):
+        if pixmap:
+            self.setScaledContents(True)
+            self.aspect_ratio = pixmap.width() / pixmap.height()
+            super().setPixmap(pixmap)
+            self.resizeEvent(QResizeEvent(self.size(), self.size()))
+        else:
+            super().setPixmap(QPixmap()) 
 
-    def heightForWidth(self, width):
-        if self.pixmap():
-            return int(width * (self.pixmap().height() / self.pixmap().width()))
+    def resizeEvent(self, event):
+        print("resize event")
+        scaled_height = (self.parent().width()) / self.aspect_ratio
+        scaled_width = (self.parent().height()) * self.aspect_ratio
 
-    def sizeHint(self):
-        return self.minimumSizeHint()
+        #if scaled_height > self.parent().height():
+        self.setFixedHeight(int(scaled_height))
 
-    def minimumSizeHint(self):
-        if self.pixmap():
-            return self.pixmap().size()
-        return super().minimumSizeHint()
+        #if scaled_width > self.parent().width():
+        #    self.setFixedWidth(int(scaled_width))
         
 
+from clickablewidget import ClickableWidget
+            
 
 
 ## - As building a exe file with no console, transformers library will suffer from an error where sys.stdout and sys.stderr are None
@@ -323,7 +331,7 @@ class UpscalePreviewThread(QThread):
 Form, Window = uic.loadUiType("GUI\SDx4_interface.ui")
 app = QApplication([])
 
-from GUI.clickablewidget import ClickableWidget
+
 
 class ThemeDesigner(QDialog):
     update_ui_preview_signal = pyqtSignal(dict)
@@ -933,7 +941,11 @@ class MainWindow(QMainWindow):
 
         # create a label to display the image
         self.image_label = ImageWidget(self)
+
         layout.addWidget(self.image_label)
+        
+        # center the label in the layout
+        
         self.image_label.hide()           # hide the image label element for now until an image is selected
 
 
@@ -1381,20 +1393,22 @@ class MainWindow(QMainWindow):
         self.is_upscale_running = False
 
     def run_upscale(self):
-        # Update current upscale status
-        self.is_upscale_running = True
+        # Check if there are files to upscale in the list 
+        if self.ui.inputFilesListDisplay.count() != 0:
+            # Update current upscale status
+            self.is_upscale_running = True
 
-        # disable all ui buttons from interaction other than the run upscale button
+            # disable all ui buttons from interaction other than the run upscale button
 
 
-        # change the run upscale button text to "Stop Upscale"
-        self.ui.runUpscaleBtn.setText("Cancel Upscale")
+            # change the run upscale button text to "Stop Upscale"
+            self.ui.runUpscaleBtn.setText("Cancel Upscale")
 
-        if self.ui.makeSettingsDefaultCheckbox.isChecked():
-            self.update_defaults()
+            if self.ui.makeSettingsDefaultCheckbox.isChecked():
+                self.update_defaults()
 
-        # Start the file processing thread
-        self.start_file_processing_thread()
+            # Start the file processing thread
+            self.start_file_processing_thread()
 
     def update_defaults(self):
 
@@ -1472,7 +1486,7 @@ class MainWindow(QMainWindow):
         # Calulate the percentage of images, tiles and iterations processed
         image_percentage = int((image_num-1 / total_images) * 100)            
         tile_percentage = int((tile_num / total_tiles) * 100)            
-        iteration_percentage = int(((iteration_num + 1) / total_iterations) * 100)          
+        iteration_percentage = int(((iteration_num) / total_iterations) * 100)          
         
         # Update the progress bars if the values have changed
         if self.ui.imageProgressBar.value() != image_percentage:
