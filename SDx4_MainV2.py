@@ -781,8 +781,8 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
 
         # Simple Customisation Settings
-        self.online_version_file_link = "https://github.com/Adillwma/BackupInspector/raw/main/config.json"
-        self.update_download_link = "https://github.com/Adillwma/BackupInspector/raw/main/BackupInspector.exe"
+        self.online_version_file_link = "https://github.com/Adillwma/SDx4_ImageUpscaler/raw/main/config.json"
+        self.update_download_link = "https://github.com/Adillwma/SDx4_ImageUpscaler/raw/main/SDx4_Upscaler.exe"
 
         # Get the path to the application data directory
         #app_data_dir = appdirs.user_data_dir(appname='SDx4 Upscaler', appauthor=False)
@@ -884,13 +884,13 @@ class MainWindow(QMainWindow):
         self.notification_animation.setEasingCurve(QEasingCurve.Type.InOutQuart)
         self.notification_animation.setDuration(1000)
         self.ui.notificationCloseBtn_UiBtnType.clicked.connect(lambda: self.run_animation(self.notification_animation, start=100, end=0))
-        self.ui.popupNotificationContainer.setMaximumHeight(0)  # Set notification container to start hidden (with max height of 0)
+        self.ui.popupNotificationContainer.setMaximumHeight(0)  # Remove notification container once new donload update methods are applied
 
         # ui theme dark / light
         self.dark_mode_path = resource_path(fr"App_Data\themes\{self.current_theme}\dark_mode.css")
         self.light_mode_path = resource_path(fr"App_Data\themes\{self.current_theme}\light_mode.css")
         self.current_ui_mode = "dark"
-        self.highlight_theme_color = "background-color: #1f232a;"
+        self.highlight_theme_color = "background-color: #1f232a;"      # remove as now dealt with in the css main file
         self.ui.uiThemeBtn_UiBtnType.clicked.connect(self.switch_ui_mode)
         self.set_icons_color("#FFFFFF")   #CHANGE COLOUR TO COME FROM STYLE SHEET PROGRAMATICALLY!!!!
         self.set_theme()
