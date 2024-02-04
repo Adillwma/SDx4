@@ -182,7 +182,7 @@ class FileProcessingThread(QThread):
             upscaled_image.save(os.path.join(self.output_dir, image_name + "_Upscaled.png"))
 
         # CLENA UP IMAGES FROM THE TEMP FOLDER HERE TOO OR COPULD KEEP THEM FOR A COMPARISON VIEWER PAGE OR SOMTHING?????
-            
+        
         # Emit the finished signal when processing is done
         self.finished.emit()
 
@@ -971,7 +971,6 @@ class MainWindow(QMainWindow):
                         self.ui.uiThemeBtn_UiBtnType,
                         ]
         
-        # find way to do this from the resources file ??? if not them move the required icons to icon folder in app data and load from there using the resource path fucntion
         self.svg_files = [[r"App_Data\icons\light\align-justify.svg"],
                           [r"App_Data\icons\light\settings.svg"],
                           [r"App_Data\icons\light\info.svg"],
@@ -1376,18 +1375,17 @@ class MainWindow(QMainWindow):
         self.cancel_upscale_dialog = CancelUpscaleDialog(self)
         self.cancel_upscale_dialog.exec()
 
-        if self.cancel_upscale_dialog.accepted:
+        if self.cancel_upscale_dialog.accepted:  # if user confirms they want to cancel the upscale then it is stopped otherwise it continues
             self.cancel_upscale()
             print("Upscale cancelled")
-        else:
-            pass
+
 
     def cancel_upscale(self):
         # Request interruption to stop the file processing thread
         self.file_processing_thread.upscaler.interupt_requested = True
 
         # change the upscale button text to "Run Upscale"
-        self.ui.runUpscaleBtn.setText("Run Upscale")
+        self.ui.runUpscaleBtn_ProgramBtnType.setText("Run Upscale")
 
         # Update current upscale status
         self.is_upscale_running = False
@@ -1468,7 +1466,6 @@ class MainWindow(QMainWindow):
         self.file_processing_thread.upscaler.interupt_requested = True
 
     def file_processing_finished(self):
-        print("File processing finished")
         if self.ui.imageProgressBar.value() != 100:
             self.ui.imageProgressBar.setValue(100)
 
@@ -1477,6 +1474,15 @@ class MainWindow(QMainWindow):
 
         if self.ui.iterationProgressBar.value() != 100:
             self.ui.iterationProgressBar.setValue(100)
+
+        # change the upscale button text to "Run Upscale"
+        self.ui.runUpscaleBtn_ProgramBtnType.setText("Run Upscale")
+
+        # Update current upscale status
+        self.is_upscale_running = False
+
+        print("File processing finished")
+
 
     def file_processing_stopped(self):
         print("File processing stopped")
