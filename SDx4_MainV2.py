@@ -903,7 +903,7 @@ class MainWindow(QMainWindow):
         self.upscale_settings_animation = QPropertyAnimation(self.ui.upscaleSettingsWidget, b"maximumWidth")
         self.upscale_settings_animation.setEasingCurve(QEasingCurve.Type.InOutQuart)
         self.upscale_settings_animation.setDuration(1000)  # Animation duration in milliseconds
-        self.ui.advancedmodeBtn.clicked.connect(self.toggle_advanced_mode)
+        self.ui.advancedmodeBtn_ProgramBtnType.clicked.connect(self.toggle_advanced_mode)
         #self.ui.upscaleSettingsWidget.setMaximumWidth(0)         # Set upscale settings widget to start hidden (with max width of 0)
 
         self.ui.iterationsSlider.valueChanged.connect(self.update_iterations_setting)
@@ -916,11 +916,11 @@ class MainWindow(QMainWindow):
         self.ui.attentionSlicingCheckbox.clicked.connect(self.toggle_attentionslicing)
         self.ui.xformersCheckbox.clicked.connect(self.toggle_xformers)
 
-        self.ui.outputLocationBrowseBtn.clicked.connect(self.browse_output_location)
-        self.ui.addFilesBtn.clicked.connect(self.browse_input_files)
-        self.ui.addfoldersBtn.clicked.connect(self.browse_input_folders)
-        self.ui.removeListItemBtn.clicked.connect(self.remove_selected_list_item)
-        self.ui.runUpscaleBtn.clicked.connect(self.upscale_btn_clicked)
+        self.ui.outputLocationBrowseBtn_ProgramBtnType.clicked.connect(self.browse_output_location)
+        self.ui.addFilesBtn_ProgramBtnType.clicked.connect(self.browse_input_files)
+        self.ui.addfoldersBtn_ProgramBtnType.clicked.connect(self.browse_input_folders)
+        self.ui.removeListItemBtn_ProgramBtnType.clicked.connect(self.remove_selected_list_item)
+        self.ui.runUpscaleBtn_ProgramBtnType.clicked.connect(self.upscale_btn_clicked)
 
         # if a user has selcted an item in the list connect the itemClicked signal to the display image function
         self.ui.inputFilesListDisplay.itemClicked.connect(self.file_selected_in_list)
@@ -956,11 +956,11 @@ class MainWindow(QMainWindow):
                         self.ui.helpBtn_UiBtnType,
                         self.ui.centerMenuCloseBtn_UiBtnType,
                         self.ui.notificationCloseBtn_UiBtnType,
-                        self.ui.advancedmodeBtn,
-                        self.ui.addFilesBtn,
-                        self.ui.addfoldersBtn, 
-                        self.ui.removeListItemBtn,
-                        self.ui.runUpscaleBtn, 
+                        self.ui.advancedmodeBtn_ProgramBtnType,
+                        self.ui.addFilesBtn_ProgramBtnType,
+                        self.ui.addfoldersBtn_ProgramBtnType, 
+                        self.ui.removeListItemBtn_ProgramBtnType,
+                        self.ui.runUpscaleBtn_ProgramBtnType, 
 
                         self.ui.makeSettingsDefaultCheckbox,
                         self.ui.cpuoffloadCheckbox,
@@ -1402,7 +1402,7 @@ class MainWindow(QMainWindow):
 
 
             # change the run upscale button text to "Stop Upscale"
-            self.ui.runUpscaleBtn.setText("Cancel Upscale")
+            self.ui.runUpscaleBtn_ProgramBtnType.setText("Cancel Upscale")
 
             if self.ui.makeSettingsDefaultCheckbox.isChecked():
                 self.update_defaults()

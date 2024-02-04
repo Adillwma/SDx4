@@ -63,9 +63,8 @@ class SDx4Upscaler(QObject):
         """
         super().__init__()  # Call the __init__ method of the parent class
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.pipeline = StableDiffusionUpscalePipeline.from_pretrained("stabilityai/stable-diffusion-x4-upscaler", torch_dtype=torch.float32, safety_checker=safety_checker)   #, local_files_only=True
-
-        #self.pipeline = StableDiffusionUpscalePipeline.from_pretrained(r"A:\Users\Ada\GitHub\AI_Image_Upscale_Windows\App_Data\models--stabilityai--stable-diffusion-x4-upscaler\snapshots\572c99286543a273bfd17fac263db5a77be12c4c", generator=self.generator, torch_dtype=torch.float32, safety_checker=safety_checker)   #, local_files_only=True
+        #self.pipeline = StableDiffusionUpscalePipeline.from_pretrained("stabilityai/stable-diffusion-x4-upscaler", torch_dtype=torch.float32, safety_checker=safety_checker, local_files_only=True)
+        self.pipeline = StableDiffusionUpscalePipeline.from_pretrained(r"App_Data\model\models--stabilityai--stable-diffusion-x4-upscaler\snapshots\572c99286543a273bfd17fac263db5a77be12c4c", torch_dtype=torch.float32, safety_checker=safety_checker)   #, local_files_only=True
         self.pipeline = self.pipeline.to(self.device)   
         self.transform = transforms.ToTensor()
 
