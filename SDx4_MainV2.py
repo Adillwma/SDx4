@@ -14,6 +14,7 @@ from PyQt6.QtCore import QPropertyAnimation, QEasingCurve, QThread, pyqtSignal, 
 from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog, QVBoxLayout, QColorDialog, QDialog, QLabel 
 from PyQt6.QtGui import QPixmap, QResizeEvent
 from PIL.ImageQt import ImageQt
+import appdirs
 
 
 
@@ -783,6 +784,10 @@ class MainWindow(QMainWindow):
         self.online_version_file_link = "https://github.com/Adillwma/BackupInspector/raw/main/config.json"
         self.update_download_link = "https://github.com/Adillwma/BackupInspector/raw/main/BackupInspector.exe"
 
+        # Get the path to the application data directory
+        #app_data_dir = appdirs.user_data_dir(appname='SDx4 Upscaler', appauthor=False)
+
+
         self.config_file = resource_path(r'App_Data\config.json')
         self.help_text_path = resource_path(r"App_Data\copy\help_text.txt")
         self.info_text_path = resource_path(r"App_Data\copy\info_text.txt")
@@ -1241,10 +1246,10 @@ class MainWindow(QMainWindow):
         # If the left menu is closed (width = 40), then it is opened
         if self.ui.upscaleSettingsWidget.maximumWidth() == 0:
             self.run_animation(self.upscale_settings_animation, start=0, end=345)
-            self.ui.advancedmodeBtn.setText("Switch to Easy Mode")
+            self.ui.advancedmodeBtn_ProgramBtnType.setText("Switch to Easy Mode")
         else:
             self.run_animation(self.upscale_settings_animation, start=345, end=0)
-            self.ui.advancedmodeBtn.setText("Switch to Advanced Mode")
+            self.ui.advancedmodeBtn_ProgramBtnType.setText("Switch to Advanced Mode")
 
     def toggle_blending(self):
         if self.ui.blendingCheckbox.isChecked():
@@ -1390,6 +1395,16 @@ class MainWindow(QMainWindow):
         # Update current upscale status
         self.is_upscale_running = False
 
+        self.enable_buttons(True)  # enable all ui buttons again          
+
+
+    def enable_buttons(self, state):
+        self.ui.addFilesBtn_ProgramBtnType.setEnabled(state)
+        self.ui.addfoldersBtn_ProgramBtnType.setEnabled(state)
+        self.ui.removeListItemBtn_ProgramBtnType.setEnabled(state)
+        self.ui.advancedmodeBtn_ProgramBtnType.setEnabled(state)
+        self.ui.outputLocationBrowseBtn_ProgramBtnType.setEnabled(state)
+
     def run_upscale(self):
         # Check if there are files to upscale in the list 
         if self.ui.inputFilesListDisplay.count() != 0:
@@ -1397,6 +1412,7 @@ class MainWindow(QMainWindow):
             self.is_upscale_running = True
 
             # disable all ui buttons from interaction other than the run upscale button
+            self.enable_buttons(False)
 
 
             # change the run upscale button text to "Stop Upscale"
@@ -1477,6 +1493,8 @@ class MainWindow(QMainWindow):
 
         # change the upscale button text to "Run Upscale"
         self.ui.runUpscaleBtn_ProgramBtnType.setText("Run Upscale")
+
+        self.enable_buttons(True)  # enable all ui buttons again   
 
         # Update current upscale status
         self.is_upscale_running = False

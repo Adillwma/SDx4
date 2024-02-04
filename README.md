@@ -6,9 +6,9 @@
 
 <img src="Images/SDX4_BANNER.png" width="800"> 
 
-    - 4x resoloution neural image upscaling
-    - Advanced blended tiled processing for upscaling large images with low memory usage.
-    - Local processing, no internet connection required, no data sent to any third party.
+      - 4x resoloution neural image upscaling
+      - Local processing, no internet connection required, no data sent to any third party.
+      - Advanced blended tiled processing for upscaling large images with low system memory.
 
 [![Github Repo](https://img.shields.io/badge/GitHub_Repo-SDx4_ImageUpscaler-yellow.svg)](https://github.com/Adillwma/SDx4_ImageUpscaler)
 [![License](https://img.shields.io/badge/license-GPLv3-green.svg)](https://github.com/Adillwma/SDx4_ImageUpscaler/blob/main/LICENSE)
@@ -177,9 +177,9 @@ This will open the settings window where you can configure the following setting
 ## Methods
 
 ### Tiled Processing
-Previous implementations of the Stable Diffusion x4 Upscaler I have found have all been wonderfull however are limited by the amount of memory (RAM or VRAM depending on compute device) available on the system. To upscale very large images the memory usage can become extreamaly high, and in some cases exceed the available memory on the system, particuallrly when run on a consumer platform with low system memory. To overcome this memory limitation i have implemented 'tiled processing'. Tiled processing involves splitting the image into tiles of a smaller size, upscaling each tile individually and then recombining them for the final output. This allows for the upscaling of very large images with low memory usage, although does come with the downside of increased processing time.
+Previous implementations of the Stable Diffusion x4 Upscaler I have found have all been wonderfull however are limited by the amount of memory (RAM or VRAM depending on compute device) available on the system. To upscale very large images the memory usage can become extreamaly high, and in some cases exceed the available memory on the system, particuallrly when run on a consumer platform with low system memory. To overcome this limitation i have implemented 'tiled processing'. Tiled processing involves splitting the image into tiles of a smaller size, upscaling each tile individually and then recombining them for the final output. This allows for the upscaling of very large images with low memory usage, although does come with the downside of increased processing time.
 
-We use a fixed tile size which is user selectable between 128, 256, 512 and 1024 pixels. Smaller tile sizes will use less memory but will increase processing time. Proper testing to determine the optimal tile size has not been conducted yet, however the model was trained on 512x512 images so it is likely that 512 is the optimal tile size in terms of output quality. 
+We use a fixed tile size which is user selectable between 128, 256, 512 and 1024 pixels. Smaller tile sizes will use less memory but will increase processing time. Proper testing to determine the optimal tile size has not been conducted yet, however the stable diffusion upscale model was trained on 512x512 images so it is likely that 512 is the optimal tile size in terms of output quality. 
 
 (NOTE: For input images that are smaller than the selected tile size the processor will abandon a tiled approach and process the image as a whole in one pass.)
 
@@ -189,7 +189,7 @@ Fixed size tiled processing neccesitates padding edges of any input images that 
 
 <img src="Images/padded_edge_distortion.png" width="800"> 
 
-The same tile shown using a black padding (left) and a my dynamic shift (right). 
+The same tile shown using padding method of tiling (left) compared to my tileshifted method (right). 
 
 </div>
 
@@ -201,8 +201,12 @@ Every tile therfore is filled with image data, solving the distortion due to til
 This does mean we are processing pixels of the image multiple times for no reason but it is favorable to it being padding which distorts the output and there si no way to scape it and retain the fixed window size for the model.
 
 ### Feathered Patching [FEATURE COMING IN NEXT RELEASE]
-Currenlty the implementation of tiles processing can cause visible seams between tiles, as shown in the following example: 
+Currently the implementation of tiles processing can cause visible seams between tiles, as shown in the following example: 
 
+<div align="center">
+
+<img src="Images/tile_blending.png" width="400"> 
+</div>
 
 To overcome this a new method of feathered patching where the tiles are blended together at the edges to reduce the visibility of the seams which will be a part of the next update. This is done by blending the edges of the tiles with the edges of the adjacent tiles. The blending is done using a user selectable blending mode,
 
@@ -221,10 +225,6 @@ These allow the tiles to be blended together in a more natural way, and can be u
 
 The aim is to be able to preview and adjust the blending live once upscaling has finished to perfect your image, although this may be further down the line with the setting having to be set before processing for now.
 
-<div align="center">
-
-<img src="Images/tile_blending.png" width="400"> 
-</div>
 
 ### Boosted Face Quality
 
@@ -269,29 +269,53 @@ Before you click the button make sure to enter a unique name for your theme in t
 
 ## Known Issues
 
-- GUI becomes non responsive while downloading the model from the huggingface server on first run. 
+- ~~GUI becomes non responsive while downloading the model from the huggingface server on first run.~~
 
-   Issue Tracking Link: [Issue #1](https://github.com/Adillwma/AI_Image_Upscale_Windows_GUI/issues/1)
+   [Issue Tracking Link](https://github.com/Adillwma/AI_Image_Upscale_Windows_GUI/issues/1)
 
-- Program will use tiling even if image is smaller than a single tile. 
+- ~~Program will use tiling even if image is smaller than a single tile.~~ 
 
-   Issue Tracking Link: [Issue #2](https://github.com/Adillwma/AI_Image_Upscale_Windows_GUI/issues/2)   
+   [Issue Tracking Link](https://github.com/Adillwma/AI_Image_Upscale_Windows_GUI/issues/2)   
 
-- Users can still navigate program when images are upscaling. 
+- ~~Users can still navigate program when images are upscaling.~~ 
 
-   Issue Tracking Link: [Issue #3](https://github.com/Adillwma/AI_Image_Upscale_Windows_GUI/issues/3) 
+   [Issue Tracking Link](https://github.com/Adillwma/AI_Image_Upscale_Windows_GUI/issues/3) 
 
-- Upscale preview stays on first image if upscaling a number of images at once. 
+- ~~Upscale preview stays on first image if upscaling a number of images at once.~~ 
 
-   Issue Tracking Link: [Issue #4](https://github.com/Adillwma/AI_Image_Upscale_Windows_GUI/issues/4) 
+   [Issue Tracking Link](https://github.com/Adillwma/AI_Image_Upscale_Windows_GUI/issues/4) 
 
-- Model download repeatedly required, include download in installer rather than at runtime.
+- ~~Model download repeatedly required, include download in installer rather than at runtime.~~
 
-   Issue Tracking Link: [Issue #5](https://github.com/Adillwma/AI_Image_Upscale_Windows_GUI/issues/5) 
+   [Issue Tracking Link](https://github.com/Adillwma/AI_Image_Upscale_Windows_GUI/issues/5) 
 
-- Add button hover effects to all buttons, so user is aware that program is still responsive.
-   Issue Tracking Link: [Issue #6](https://github.com/Adillwma/AI_Image_Upscale_Windows_GUI/issues/6) 
+- ~~Add button hover effects to all buttons, so user is aware that program is still responsive.~~
 
+   [Issue Tracking Link](https://github.com/Adillwma/AI_Image_Upscale_Windows_GUI/issues/6) 
+
+- Better distinguish disabled buttons from enabled buttons.
+
+   [Issue Tracking Link](https://github.com/Adillwma/AI_Image_Upscale_Windows_GUI/issues/7)
+
+-  Move download update button to a popup window rather than always shown
+
+   [Issue Tracking Link](https://github.com/Adillwma/AI_Image_Upscale_Windows_GUI/issues/8)
+
+- Prevent preview image extending out of frame
+
+   [Issue Tracking Link](https://github.com/Adillwma/AI_Image_Upscale_Windows_GUI/issues/9)
+
+- Theme designer, randomise single colour not updating ui preview
+
+   [Issue Tracking Link](https://github.com/Adillwma/AI_Image_Upscale_Windows_GUI/issues/10)
+
+- Light theme needs finishing
+
+   [Issue Tracking Link](https://github.com/Adillwma/AI_Image_Upscale_Windows_GUI/issues/11)
+
+- Make default path for the add images and add image folder more sensible
+
+   [Issue Tracking Link](https://github.com/Adillwma/AI_Image_Upscale_Windows_GUI/issues/12)
 
 ## License
 This project is released under the GPL v3 license, [LICENSE](https://github.com/Adillwma/SDx4_ImageUpscaler/blob/main/LICENSE). This project also uses the following third-party libraries, please refer to the individual liscences for more information:
