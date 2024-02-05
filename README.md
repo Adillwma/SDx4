@@ -1,5 +1,27 @@
 <div align="center">
 
+#  DeepClean3D
+### Author: Adill Al-Ashgar
+#### 3D Neural Denoising for LHCb TORCH at the Large Hadron Collider
+#### Department of Physics - University of Bristol, UK 
+
+<img src="Images/DC3D_sensor_logo.gif" width=600>
+
+    - Remove Uncorrelated Photons Detected by TORCH
+    - Correct for Chromatic Dispersion and Edge Reflection Effects
+    - Automatic Cherenkov Pattern Detection in Three Dimensions (X, Y and ToF)
+    - Streamline track reconstruction in preparation for HL-LHC
+
+[![Github Repo](https://img.shields.io/badge/GitHub_Repo-DEEPCLEAN3D-yellow.svg)](https://github.com/Adillwma/DeepClean3D)
+[![Language](https://img.shields.io/badge/language-Python_3+-blue.svg)](https://www.python.org/) 
+[![Library](https://img.shields.io/badge/library-PyTorch_2+-orange.svg)](https://pytorch.org/)
+[![Published](https://img.shields.io/badge/Published-2023-purple.svg)]()
+</div>
+
+
+
+<div align="center">
+
 # Windows SDx4 Image Upscaler v0.9.1 [BETA RELEASE]
 ### Author: Adill Al-Ashgar
 #### Stability AI's Stable Diffusion x4 Upscaler in Locally Executable Windows GUI Package with advanced features.
