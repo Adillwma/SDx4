@@ -10,6 +10,7 @@
 
 
 <div align="center">
+
     - 4x resoloution neural image upscaling
     - Local processing, no internet connection required, no data sent to any third party.
     - Advanced blended tiled processing for upscaling large images with low system memory.
