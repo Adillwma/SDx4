@@ -1,6 +1,6 @@
 <div align= "center">
 
-# Windows SDx4 Image Upscaler v0.9.1 [EARLY ALPHA RELEASE]
+# SDx4 v0.9.1 - Image Upscaler for Win 10+ [EARLY ALPHA RELEASE] 
 ### Author: Adill Al-Ashgar
 #### Stability AI's Stable Diffusion x4 Upscaler in Locally Executable Windows GUI Package with advanced features.
 
