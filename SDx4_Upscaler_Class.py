@@ -4,13 +4,27 @@ import logging
 import numpy as np
 from tqdm import tqdm
 import matplotlib.pyplot as plt
-from torchvision import transforms
 from PyQt6.QtCore import pyqtSignal, QObject
 from PIL import Image, ImageChops, ImageEnhance
-from diffusers import StableDiffusionUpscalePipeline
+import os
+import sys
+
+
+
+## - As building a exe file with no console, transformers library will suffer from an error where sys.stdout and sys.stderr are None
+# Below four lines fix this issue by redirecting stdout and stderr to os.devnull as suggested here: https://github.com/huggingface/transformers/issues/24047#issuecomment-1635532509
+if sys.stdout is None:
+    sys.stdout = open(os.devnull, "w")
+if sys.stderr is None:
+    sys.stderr = open(os.devnull, "w")
+
+
+import diffusers
 
 ### callback images washed out/odd?
 ### fix all blending modes. currently only normal works
+
+
 
 
 class SDx4Upscaler(QObject):
@@ -56,17 +70,21 @@ class SDx4Upscaler(QObject):
     callback_signal = pyqtSignal(object, int)             # Emits (callback_tile_preview, current_tile_number, local_image_path) during the upscaling process for external tracking or visulisation to users
     tile_complete_signal = pyqtSignal(object, int)        # Emits (upscaled_tile_image, current_tile_number, local_image_path) number of the tile that has just been upscaled
 
-    def __init__(self, xformers=False, cpu_offload=False, attention_slicing=False, seed=None, safety_checker=None, log_level="DEBUG", log_to_file=False):
+    def __init__(self, xformers=False, cpu_offload=False, attention_slicing=False, seed=None, safety_checker=None, local_model_path=None, log_level="DEBUG", log_to_file=False):
         """
         possible loging levels: "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"
         logging will go to console if log_to_file is False, otherwise it will go to a file called SDx4Upscaler.log
         """
         super().__init__()  # Call the __init__ method of the parent class
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        #self.pipeline = StableDiffusionUpscalePipeline.from_pretrained("stabilityai/stable-diffusion-x4-upscaler", torch_dtype=torch.float32, safety_checker=safety_checker, local_files_only=True)
-        self.pipeline = StableDiffusionUpscalePipeline.from_pretrained(r"App_Data\model\models--stabilityai--stable-diffusion-x4-upscaler\snapshots\572c99286543a273bfd17fac263db5a77be12c4c", torch_dtype=torch.float32, safety_checker=safety_checker)   #, local_files_only=True
+
+        if local_model_path:
+            self.pipeline = diffusers.StableDiffusionUpscalePipeline.from_pretrained(local_model_path, torch_dtype=torch.float32, safety_checker=safety_checker, local_files_only=True) 
+        else:
+            self.pipeline = diffusers.StableDiffusionUpscalePipeline.from_pretrained("stabilityai/stable-diffusion-x4-upscaler", torch_dtype=torch.float32, safety_checker=safety_checker)
+        
+        
         self.pipeline = self.pipeline.to(self.device)   
-        self.transform = transforms.ToTensor()
 
         if xformers and self.device == "cuda":
             self.pipeline.enable_xformers_memory_efficient_attention()
@@ -84,7 +102,7 @@ class SDx4Upscaler(QObject):
         Initialises the logging system.
 
         arguments:
-            - log_level (str): The logging level to use. Possible values are "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL".
+            - log_level (str): The logging level to use. Values are "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL".
             - log_to_file (bool): If True, logging will go to a file called SDx4Upscaler.log. If False, logging will go to the console.
         """
         # Create a logger for this class
@@ -94,6 +112,7 @@ class SDx4Upscaler(QObject):
         numeric_level = getattr(logging, log_level.upper(), None)
         if not isinstance(numeric_level, int):
             raise ValueError(f'Invalid log level: {log_level}')
+        
         self.logger.setLevel(numeric_level)
 
         if numeric_level > 20: # 10 is debug. 20 is INFO, 30 is WARNING, 40 is ERROR, 50 is CRITICAL
@@ -103,7 +122,7 @@ class SDx4Upscaler(QObject):
         # Create a formatter
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt='%d-%m-%Y %H:%M:%S')
 
-        # Create a handler based on the user's preference
+        # Create a handler 
         if log_to_file:
             file_handler = logging.FileHandler(r'App_Data/SDx4Upscaler.log')
             file_handler.setFormatter(formatter)
@@ -458,19 +477,19 @@ class SDx4Upscaler(QObject):
 # Demo usage of the SDx4Upscaler class
 if __name__ == "__main__":
 
-    # specify local image paths
-    local_image_paths = [r"A:\Users\Ada\Desktop\funkyspace.png"] # replace with your actual image path
-    prompt = ""
-    negative_prompt = ""
-    num_inference_steps = 3   # Short for very quick test, should be 15+ for good reproduction 
-    guidance_scale = 0.5
-    patch_size = 120
-    padding_size = 8
-    boost_face_quality = False
-    callback_steps = 1
-    blending = False
-    show_patches = False
-    dummy_upscale = False              # For debugging. If True, will not use the neural net to upscale image, instead a very very fast bicubic upscale is used, to speed up testing the rest of the code. Always set to False for actual usage.
+    local_image_paths = [r"A:\Users\Ada\Desktop\funkyspace.png"]          # Test image path/s must be in a list  
+    prompt = ""                                                           # Text prompt to use to influence the upscale towards certain features
+    negative_prompt = ""                                                  # Negative text prompt to influence the upscale away from certain features
+    num_inference_steps = 3                                               # Short for very quick test, should be 15+ for good reproduction 
+    guidance_scale = 0.5                                                  # The guidance scale sets how strongly the upscale will be guided by the prompt and negative promt vs guided by the input image, set to ??? for best results
+    window_size = 128                                                     # The size of the window to be used for the patches in pixels [CONNECT THIS!!!]
+    patch_size = 120                                                      # The size of the patches to be extracted from the image in pixels !! REMOVE (this hsould be detemined form pad size and window size which is pad size + patch size)
+    padding_size = 8                                                      # Minimum number of pixels of padding on right and bottom sides of the patches (this padding area will be blended over so the larger the padding minimum the larger the blanded areas will be, the samller the pad the thinner the blends will be)
+    boost_face_quality = False                                            # If True, raises the number of inference steps for patches containing faces
+    callback_steps = 1                                                    # The number of steps between returning a callback signal
+    blending = False                                                      # If True, blends patches together for a smoother result
+    show_patches = False                                                  # If True, shows patches for debugging purposes
+    dummy_upscale = False                                                 # For debugging. If True, will not use the neural net to upscale image, instead a very very fast bicubic upscale is used, to speed up testing the rest of the code. Always set to False for actual usage.
 
     # Create an instance of the SDx4Upscaler class
     upscale = SDx4Upscaler()

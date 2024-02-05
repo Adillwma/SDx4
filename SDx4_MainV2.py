@@ -1,10 +1,13 @@
 import os
 import sys
-import json
+from json import load as json_load 
+from json import dump as json_dump
 import requests
 import numpy as np
 from PyQt6 import uic
-import matplotlib.pyplot as plt
+from matplotlib.pyplot import subplots as plt_subplots
+from shutil import move as shutil_move
+from matplotlib.pyplot import cm as plt_cm
 from PyQt6.QtSvg import QSvgRenderer
 from PyQt6.QtXml import QDomDocument
 from PIL import Image, ImageDraw, ImageFont
@@ -14,9 +17,30 @@ from PyQt6.QtCore import QPropertyAnimation, QEasingCurve, QThread, pyqtSignal, 
 from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog, QVBoxLayout, QColorDialog, QDialog, QLabel 
 from PyQt6.QtGui import QPixmap, QResizeEvent
 from PIL.ImageQt import ImageQt
-import appdirs
+#import appdirs
+
+# trye to take the signals directly from file_processing_thread.upscaler to the gui clss without going through the file_processing_thread classs, aslo then can xsperate the image complete proress signal freom the other two and put image complete after the image is porcessed in file_processing_thread
 
 
+import urllib3
+
+
+## - As building a exe file with no console, transformers library will suffer from an error where sys.stdout and sys.stderr are None
+# Below four lines fix this issue by redirecting stdout and stderr to os.devnull as suggested here: https://github.com/huggingface/transformers/issues/24047#issuecomment-1635532509
+if sys.stdout is None:
+    sys.stdout = open(os.devnull, "w")
+if sys.stderr is None:
+    sys.stderr = open(os.devnull, "w")
+import diffusers   # this must come after the above fix otherwise will cause the error discussed 
+
+from SDx4_Upscaler_Class import SDx4Upscaler
+
+import resources_rc
+
+
+
+# Gui classes
+from clickablewidget import ClickableWidget
 
 class ImageWidget(QLabel):
     def __init__(self, parent=None):
@@ -44,30 +68,35 @@ class ImageWidget(QLabel):
         #    self.setFixedWidth(int(scaled_width))
         
 
-from clickablewidget import ClickableWidget
-            
-
-
-## - As building a exe file with no console, transformers library will suffer from an error where sys.stdout and sys.stderr are None
-# Below four lines fix this issue by redirecting stdout and stderr to os.devnull as suggested here: https://github.com/huggingface/transformers/issues/24047#issuecomment-1635532509
-if sys.stdout is None:
-    sys.stdout = open(os.devnull, "w")
-if sys.stderr is None:
-    sys.stderr = open(os.devnull, "w")
-
-#from customWidgets import CustomToggle, CustomIcon
-import resources_rc
-
-# trye to take the signals directly from file_processing_thread.upscaler to the gui clss without going through the file_processing_thread classs, aslo then can xsperate the image complete proress signal freom the other two and put image complete after the image is porcessed in file_processing_thread
-
 #%% Helper Functions
 def resource_path(relative_path):
     """ Get the absolute path to a resource, works for dev and for PyInstaller """
     base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
     return os.path.join(base_path, relative_path)
 
-#%% - Backend Program Functions
-from SDx4_Upscaler_Class import SDx4Upscaler
+#%% - Backend Program Threads
+class ModelDownloadthread(QThread):
+
+    # create a signal to downlaod failed signal
+    download_failed_signal = pyqtSignal()
+
+    def __init__(self, model_folder=resource_path("App_Data\\model\\")):
+        super().__init__()
+        self.model_folder = model_folder
+
+    def run(self):    
+        try:    
+            original_model_path = diffusers.DiffusionPipeline.download("stabilityai/stable-diffusion-x4-upscaler")
+            original_model_path = str(original_model_path)
+
+            model_path = original_model_path.split("snapshots")[0]
+            model_destination_path = model_path.split("hub\\")[1]
+
+            # Move the 'model_path' folder and all its contents to the 'model_destination_path' 
+            shutil_move(model_path, self.model_folder + model_destination_path)
+        except:
+            self.download_failed_signal.emit()
+            return
 
 class FileHandlingThread(QThread):
     def __init__(self, temp_folder, previous_processing_file_list=None):
@@ -188,12 +217,12 @@ class FileProcessingThread(QThread):
         self.finished.emit()
 
     
-    def initialize_upscale_job(self, processing_file_list, output_dir, patch_size, padding_size, num_inference_steps, guidance_scale, prompt, negative_prompt, boost_face_quality, blending, blend_mode, callback_steps, show_patches, dummy_upscale, xformers, cpu_offload, attention_slicing, seed, safety_checker):
+    def initialize_upscale_job(self, processing_file_list, output_dir, patch_size, padding_size, num_inference_steps, guidance_scale, prompt, negative_prompt, boost_face_quality, blending, blend_mode, callback_steps, show_patches, dummy_upscale, xformers, cpu_offload, attention_slicing, seed, safety_checker, local_model_path):
 
         self.local_image_paths = [file_info["input_file_path"] for file_info in processing_file_list]
         self.number_of_images = len(self.local_image_paths)
 
-        self.upscaler = SDx4Upscaler(xformers, cpu_offload, attention_slicing, seed, safety_checker)
+        self.upscaler = SDx4Upscaler(xformers, cpu_offload, attention_slicing, seed, safety_checker, local_model_path)
         self.upscaler.callback_signal.connect(self.send_patch_preview)
         self.upscaler.tile_complete_signal.connect(self.send_tile_complete)
         self.upscaler.processing_position_signal.connect(self.send_progress_update)
@@ -267,7 +296,7 @@ class UpscalePreviewThread(QThread):
 
                 # Draw a border around the patchwith the colour genrated from the patch number
                 patch_number = c * number_of_windows_in_row + r
-                colour = plt.cm.jet(patch_number / (number_of_windows_in_col * number_of_windows_in_row))
+                colour = plt_cm.jet(patch_number / (number_of_windows_in_col * number_of_windows_in_row))
                 # Convert the float values to integers for the color tuple
                 colour_int = tuple(int(x * 255) for x in colour[:-1])
                 
@@ -314,7 +343,7 @@ class UpscalePreviewThread(QThread):
         self.preview_image.paste(patch_image, (int(x_start_point), int(y_start_point)))
 
         # Draw a border around the patchwith the colour genrated from the patch number
-        colour = plt.cm.jet(patch_number / (number_of_windows_in_col * number_of_windows_in_row))
+        colour = plt_cm.jet(patch_number / (number_of_windows_in_col * number_of_windows_in_row))
 
         # Convert the float values to integers for the color tuple
         colour_int = tuple(int(x * 255) for x in colour[:-1])
@@ -329,11 +358,11 @@ class UpscalePreviewThread(QThread):
 
 
 #%%  - Load the UI file
-Form, Window = uic.loadUiType("GUI\SDx4_interface.ui")
+Form, Window = uic.loadUiType(r"GUI\SDx4_interface.ui")
 app = QApplication([])
 
 
-
+# Secondary UI files
 class ThemeDesigner(QDialog):
     update_ui_preview_signal = pyqtSignal(dict)
     add_new_theme_signal = pyqtSignal(str)
@@ -532,10 +561,10 @@ class ThemeDesigner(QDialog):
 
         # load the css files into the strings
         with open(resource_path(f'App_Data/themes/{theme}/{theme}_dark_theme_dictionary.json'), 'r') as file:
-            self.dark_theme_dictionary = json.load(file)
+            self.dark_theme_dictionary = json_load(file)
 
         with open(resource_path(f'App_Data/themes/{theme}/{theme}_light_theme_dictionary.json'), 'r') as file:
-            self.light_theme_dictionary = json.load(file)
+            self.light_theme_dictionary = json_load(file)
 
         # load all the values from the theme color dictionaries into the lists
         self.dark_mode_colors = list(self.dark_theme_dictionary.values())
@@ -721,11 +750,11 @@ class ThemeDesigner(QDialog):
 
         # save the dictionary to a file so it can be loaded later as a dictionary easily
         with open(resource_path(f'App_Data/themes/{theme_name}/{theme_name}_dark_theme_dictionary.json'), 'w') as f:
-            json.dump(self.dark_theme_dictionary, f)
+            json_dump(self.dark_theme_dictionary, f)
 
         # save the dictionary to a file so it can be loaded later as a dictionary easily
         with open(resource_path(f'App_Data/themes/{theme_name}/{theme_name}_light_theme_dictionary.json'), 'w') as f:
-            json.dump(self.light_theme_dictionary, f)
+            json_dump(self.light_theme_dictionary, f)
 
         # add the theme to the avalible themes list
         #self.avalible_themes.append(theme_name)
@@ -771,6 +800,37 @@ class CancelUpscaleDialog(QDialog):
         self.accepted = False
         super().reject()
 
+class ModelDownloadPopup(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        modelDownloadPopupForm, modelDownloadPopupWindow = uic.loadUiType(resource_path(r'App_Data\modelDownloadPopupInterface.ui'))
+        self.ui = modelDownloadPopupForm()
+        self.ui.setupUi(self)
+        self.setWindowTitle("Model Download")
+        self.ui.cancelModelDownloadBtn.clicked.connect(self.cancel_download)
+
+
+        self.download_model_thread = ModelDownloadthread()
+        self.download_model_thread.finished.connect(self.finished_model_download)
+        self.download_model_thread.download_failed_signal.connect(self.download_failed)
+        self.download_model_thread.start()
+
+    def finished_model_download(self):
+        self.accepted = True
+        super().accept()
+
+    def download_failed(self):
+        # display error message
+        #self.ui.downloadStatusLabel.setText("Download Failed")
+        self.accepted = False
+        super().reject()
+
+    def cancel_download(self):
+        self.accepted = False
+        # kill the download thread
+        self.download_model_thread.terminate()
+        super().reject()
+
 
         
 ## MAIN WINDOW CLASS
@@ -793,6 +853,7 @@ class MainWindow(QMainWindow):
         self.info_text_path = resource_path(r"App_Data\copy\info_text.txt")
         self.temp_folder = resource_path(r"App_Data\temp_data")   
         self.main_css_path = resource_path(r"App_Data\mainStylesheet.css")
+        self.local_model_path = resource_path(r"App_Data\model\models--stabilityai--stable-diffusion-x4-upscaler\snapshots\572c99286543a273bfd17fac263db5a77be12c4c")
 
         ### Initialise UI Elements
         self.check_preferences()          # Checks the user preferences file to load the correct settings
@@ -830,7 +891,7 @@ class MainWindow(QMainWindow):
     def check_preferences(self):                                                            # Checks the user preferences file to load the correct settings
         # Load data from the config file
         with open(self.config_file, 'r') as file:
-            self.config_data = json.load(file)
+            self.config_data = json_load(file)
 
         # check if the program has been run before if not run wizard for user to set preferences
         if self.config_data["First Run"] == True:
@@ -930,8 +991,9 @@ class MainWindow(QMainWindow):
         # if a user has selcted an item in the list connect the itemClicked signal to the display image function
         self.ui.inputFilesListDisplay.itemClicked.connect(self.file_selected_in_list)
 
+
         # Create a Matplotlib figure and canvas
-        self.figure, self.ax = plt.subplots()
+        self.figure, self.ax = plt_subplots()
         self.canvas = FigureCanvas(self.figure)
 
         # Create a layout for the widget_28 if it's not a layout already
@@ -939,7 +1001,7 @@ class MainWindow(QMainWindow):
 
         # Add the canvas to the layout
         layout.addWidget(self.canvas)
-        self.user_text_warning = self.ax.text(0.5, 0.5, 'Please select an image', horizontalalignment='center', verticalalignment='center', transform=self.ax.transAxes, fontsize=20)              # add text on the plot to tell the user to select an image
+        self.user_text_warning = self.ax.text(0.5, 0.5, 'Please add image files', horizontalalignment='center', verticalalignment='center', transform=self.ax.transAxes, fontsize=20)              # add text on the plot to tell the user to select an image
         self.ax.axis('off')                                 # turn off axis
         self.figure.patch.set_alpha(0)                      # set mpl background alpha to 0 to make it transparent 
         self.canvas.draw()                 # Refresh the canvas 
@@ -1089,7 +1151,7 @@ class MainWindow(QMainWindow):
             self.run_animation(self.notification_animation, start=0, end=100)
             return
         
-        latest_config_data = json.loads(text_content) # load as json data with 'loads' for string
+        latest_config_data = json_load(text_content) # load as json data with 'loads' for string
         
         latest_version = latest_config_data["Version"]
         latest_version_int = int(''.join(latest_version.split('.')))
@@ -1137,8 +1199,8 @@ class MainWindow(QMainWindow):
             raw_css_data = f.read()
 
         # Load the data from the json file as a dictionary
-        with open(resource_path(f'App_Data\\themes\\{self.current_theme}\{self.current_theme}_{self.current_ui_mode}_theme_dictionary.json'), 'r') as f:
-            theme_dictionary = json.load(f)
+        with open(resource_path(f'App_Data\\themes\\{self.current_theme}\\{self.current_theme}_{self.current_ui_mode}_theme_dictionary.json'), 'r') as f:
+            theme_dictionary = json_load(f)
 
         # Parse the main css file and add in the theme colors
         processed_css = self.custom_qss_css_parser(theme_dictionary, raw_css_data)
@@ -1151,12 +1213,12 @@ class MainWindow(QMainWindow):
 
         # Save the current theme as default startup theme in the config JSON file
         with open(self.config_file, 'r') as file:
-            data = json.load(file)
+            data = json_load(file)
 
         data["Theme"] = self.current_theme   # Update the "Theme" value
 
         with open(self.config_file, 'w') as file:
-            json.dump(data, file)  
+            json_dump(data, file)  
 
     def custom_qss_css_parser(self, theme_dictionary, css_data):
         '''Parses the main.css file and adds in the theme colors'''
@@ -1428,7 +1490,7 @@ class MainWindow(QMainWindow):
 
         # Load data from the config file
         with open(self.config_file, 'r') as file:
-            self.config_data = json.load(file)
+            self.config_data = json_load(file)
         
         # Directory Paths
         self.config_data["output_dir"] = self.output_dir
@@ -1447,7 +1509,7 @@ class MainWindow(QMainWindow):
 
         # Save the updated config data to the config file
         with open(self.config_file, 'w') as file:
-            json.dump(self.config_data, file, indent=4)
+            json_dump(self.config_data, file, indent=4)
 
     #%% - Backend Thread Functions
     def start_file_processing_thread(self):  
@@ -1470,8 +1532,9 @@ class MainWindow(QMainWindow):
                                                             self.cpu_offload,                    # If True, will use the CPU for the first few inference steps, then switch to the GPU. If False, will use the GPU for all inference steps. If True, will be slower but will use less GPU memory.
                                                             self.attention_slicing,              # If True, will use attention slicing. If False, will not use attention slicing. If True, will be slower but will use less GPU memory.
                                                             self.seed,                            # If None, will use a random seed. If set to a numerical value, will use value as the generator seed.
-                                                            self.safety_checker)
-
+                                                            self.safety_checker,
+                                                            self.local_model_path,               # Path to the local model. If None, will downlaod from huggingface model hub.
+                                                            )       
         # Start the file processing thread run method
         self.file_processing_thread.start()
 
@@ -1525,9 +1588,39 @@ class MainWindow(QMainWindow):
 
 #%% - Run Program
 if __name__ == "__main__":
-    window = MainWindow()
-    window.show()
-    sys.exit(app.exec())
+
+    # open the config.json file
+    #with open(resource_path("App_Data\\config.json"), 'r') as file:
+    #    config_data = json_load(file)
+    
+    # Check if the program has been run before 
+    #if config_data["First Run"] == True:
+
+    
+    model_folder_path = resource_path("App_Data\\model")
+
+    # check if the model folder exists
+    if not os.path.exists(model_folder_path):
+        # cretae the model folder
+        os.makedirs(model_folder_path)
+
+        # if there are no files in the model folder then run the model download window    
+        # Run popup window to download model update before program runs
+        prerun_window = ModelDownloadPopup()
+        prerun_window.exec()
+
+        if prerun_window.accepted:
+            # Run main program 
+            window = MainWindow()
+            window.show()
+            sys.exit(app.exec())
+    
+    # if window completed download then close window and run main program
+    else: 
+        # Run main program 
+        window = MainWindow()
+        window.show()
+        sys.exit(app.exec())
 
 
 
