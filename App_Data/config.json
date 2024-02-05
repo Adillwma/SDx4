@@ -1,0 +1,1 @@
+{"Version": "1.0.0", "Theme": "default", "UI": "Dark", "First Run": false, "blending": false, "blend_mode": "Add", "num_inference_steps": 5, "guidance_scale": 0, "cpu_offload": false, "boost_face_quality": true, "attention_slicing": false, "xformers": false, "output_dir": "C:\\SDx4_Output_Folder\\"}

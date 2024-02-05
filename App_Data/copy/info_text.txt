@@ -1,0 +1,24 @@
+SDx4 Image Upscaler
+Version: 1.0.1 (x64) 
+
+RELEASE NOTES LINK
+ </span><a href="https://github.com/Adillwma/BackupInspector/commits/main"><span style=" text-decoration: underline; color:#0000ff;">Release Notes</span></a>
+
+APPLICATION ONE LINE DESCRIPTION.
+
+Copyright © COMPANY NAME, 2023 - All Rights Reserved
+
+Stability AI Stable Diffusion x4 Upscaler used under liscence. 
+Developed by: Robin Rombach, Patrick Esser 
+</span><a href="https://huggingface.co/stabilityai/stable-diffusion-x4-upscaler"><span style=" text-decoration: underline; color:#0000ff;">stable-diffusion-x4-upscaler on HuggingFace</span></a>
+License: CreativeML Open RAIL++-M License
+
+PyQt6 used under liscence.
+Developer: Riverbank Computing Limited
+</span><a href="https://www.riverbankcomputing.com/software/pyqt/"><span style=" text-decoration: underline; color:#0000ff;">Riverbank Computing</span></a>
+License: GPL v3
+
+NSIS used under liscence.
+Developer: NSIS Contributors
+</span><a href="https://nsis.sourceforge.io/Main_Page"><span style=" text-decoration: underline; color:#0000ff;">NSIS Corporation</span></a>
+License: zlib/libpng License
