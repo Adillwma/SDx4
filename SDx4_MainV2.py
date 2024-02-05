@@ -383,7 +383,8 @@ class ThemeDesigner(QDialog):
         self.ui = ThemeDesignerForm()
 
         self.ui.setupUi(self)
-        self.setWindowTitle("Theme Designer")
+        self.setWindowTitle("SDx4 Theme Designer")
+        self.setWindowIcon(QIcon(resource_path(r'App_Data\icons\SDx4_Icon.ico')))
         self.init_css_theme()
         self.init_signals()
         self.load_theme(self.current_ui_theme)
@@ -773,7 +774,7 @@ class ExitDialog(QDialog):
         exitDialogForm, exitDialogWindow = uic.loadUiType(resource_path(r'App_Data\exitDialogInterface.ui'))
         self.ui = exitDialogForm()
         self.ui.setupUi(self)
-        self.setWindowTitle("Exit Confirmation")
+        self.setWindowTitle("Exit")
 
     def accept(self):
         self.accepted = True
@@ -790,7 +791,7 @@ class CancelUpscaleDialog(QDialog):
         cancelUpscaleDialogForm, cancelUpscaleDialogWindow = uic.loadUiType(resource_path(r'App_Data\cancelUpscaleDialogInterface.ui'))
         self.ui = cancelUpscaleDialogForm()
         self.ui.setupUi(self)
-        self.setWindowTitle("Cancel Upscale Confirmation")
+        self.setWindowTitle("Cancel Upscale")
 
     def accept(self):
         self.accepted = True
@@ -839,6 +840,8 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.ui = Form()
         self.ui.setupUi(self)
+        self.setWindowTitle("SDx4 Upscaler")
+        self.setWindowIcon(QIcon(resource_path(r'App_Data\icons\SDx4_Icon.ico')))
 
         # Simple Customisation Settings
         self.online_version_file_link = "https://github.com/Adillwma/SDx4_ImageUpscaler/raw/main/config.json"
