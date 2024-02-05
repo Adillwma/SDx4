@@ -4,14 +4,12 @@
 ### Author: Adill Al-Ashgar
 #### Stability AI's Stable Diffusion x4 Upscaler in Locally Executable Windows GUI Package with advanced features.
 
-    - Remove Uncorrelated Photons Detected by TORCH
-    - Correct for Chromatic Dispersion and Edge Reflection Effects
-    - Automatic Cherenkov Pattern Detection in Three Dimensions (X, Y and ToF)
-    - Streamline track reconstruction in preparation for HL-LHC
-
-
 <img src="Images/SDX4_BANNER.png" width="800"> 
 
+</div>
+
+
+<div align="center">
     - 4x resoloution neural image upscaling
     - Local processing, no internet connection required, no data sent to any third party.
     - Advanced blended tiled processing for upscaling large images with low system memory.
