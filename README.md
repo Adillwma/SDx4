@@ -10,14 +10,18 @@
       - Local processing, no internet connection required, no data sent to any third party.
       - Advanced blended tiled processing for upscaling large images with low system memory.
 
-[![Github Repo](https://img.shields.io/badge/GitHub_Repo-SDx4_ImageUpscaler-yellow.svg)](https://github.com/Adillwma/SDx4_ImageUpscaler)
-[![License](https://img.shields.io/badge/license-GPLv3-green.svg)](https://github.com/Adillwma/SDx4_ImageUpscaler/blob/main/LICENSE)
 [![Language](https://img.shields.io/badge/language-Python-blue.svg)](https://www.python.org/)
+[![Github Repo](https://img.shields.io/badge/GitHub_Repo-SDx4_ImageUpscaler-yellow.svg)](https://github.com/Adillwma/SDx4_ImageUpscaler)
+[![License](https://img.shields.io/badge/license-GPLv3-violet.svg)](https://github.com/Adillwma/SDx4_ImageUpscaler/blob/main/LICENSE)
+
+[![Download](https://img.shields.io/badge/Download-SDx4_Windows_Installer-red.svg)](https://drive.google.com/file/d/1Cs3hMt9D-YJOe3HW44fJptYG9iyjL2F_/view?usp=sharing)
 
 </div>
 
 ## Introduction
 SDx4 Image Upscaler is a user-friendly native Windows program that leverages the power of the [Stable Diffusion x4 Upscaler](https://huggingface.co/stabilityai/stable-diffusion-x4-upscaler) model developed by [Stability AI](https://stability.ai/). This package is designed to provide a seamless, lightweight, and secure way to upscale your images with cutting edge neural upscaling. The package is bundled as a Windows installer, eliminating the need for Python or any additional code dependencies and includes smart tiled processing to massivly reduce the RAM/VRAM requirments for processing large images. Happy enhancing!
+
+Windows Installer Download Link:  [SDx4 Download](https://drive.google.com/file/d/1Cs3hMt9D-YJOe3HW44fJptYG9iyjL2F_/view?usp=sharing)
 
 ## Table of Contents
 - [Features](#main-features)
@@ -62,7 +66,7 @@ SDx4 Image Upscaler is a user-friendly native Windows program that leverages the
 ### Windows 10 +
 To install SDx4 for Windows, follow these steps:
 
-1. Download the latest release of Windows_SDx4.exe from this repo using the following link: [SDx4 Download](https://github.com/Adillwma/Windows_SDx4/raw/main/Windows_SDx4.exe)
+1. Download the latest release of Windows_SDx4.exe from this repo using the following link: [SDx4 Download](https://drive.google.com/file/d/1Cs3hMt9D-YJOe3HW44fJptYG9iyjL2F_/view?usp=sharing)
 
 2. Run the downloaded 'SDx4 Image Upscaler.exe' file and follow the on screen instructions to install the program.
 
