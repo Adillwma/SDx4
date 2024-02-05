@@ -6,9 +6,9 @@
 
 <img src="Images/SDX4_BANNER.png" width="800"> 
 
-      - 4x resoloution neural image upscaling
-      - Local processing, no internet connection required, no data sent to any third party.
-      - Advanced blended tiled processing for upscaling large images with low system memory.
+   - 4x resoloution neural image upscaling
+   - Local processing, no internet connection required, no data sent to any third party.
+   - Advanced blended tiled processing for upscaling large images with low system memory.
 
 [![Language](https://img.shields.io/badge/language-Python-blue.svg)](https://www.python.org/)
 [![Github Repo](https://img.shields.io/badge/GitHub_Repo-SDx4_ImageUpscaler-yellow.svg)](https://github.com/Adillwma/SDx4_ImageUpscaler)
